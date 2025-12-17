@@ -1,20 +1,21 @@
 import type { MetadataRoute } from 'next'
-import categories from '@/data/categories.json'
+import categories from '../data/categories.json'
+import { site } from '../lib/config'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://savvydealshub.com').replace(/\/$/, '')
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = site.url.replace(/\/$/, '')
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified: new Date() },
-    { url: `${base}/products`, lastModified: new Date() },
-    { url: `${base}/about`, lastModified: new Date() },
-    { url: `${base}/privacy`, lastModified: new Date() },
+  const routes: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/`, lastModified: new Date() },
+    { url: `${baseUrl}/products`, lastModified: new Date() },
   ]
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${base}/c/${c.slug}`,
-    lastModified: new Date(),
-  }))
+  for (const cat of (categories as any[])) {
+    routes.push({
+      url: `${baseUrl}/c/${cat.slug}`,
+      lastModified: new Date(),
+    })
+  }
 
-  return [...staticRoutes, ...categoryRoutes]
+  return routes
 }

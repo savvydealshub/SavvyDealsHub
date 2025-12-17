@@ -1,115 +1,81 @@
-import ProductCard from '@/components/ProductCard'
-import productsSample from '@/data/products-sample.json'
-import categories from '@/data/categories.json'
-import type { Metadata } from 'next'
-import Link from 'next/link'
+import ProductCard from '../../components/ProductCard'
+import products from '../../data/products-sample.json'
+import categories from '../../data/categories.json'
 
-export const metadata: Metadata = {
-  title: 'All Products | SavvyDealsHub',
-  description: 'Browse our curated deals and products.',
+type ProductsPageProps = {
+  searchParams: {
+    q?: string
+    category?: string
+  }
 }
 
-type SearchParams = {
-  q?: string
-  category?: string
-}
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const q = (searchParams.q ?? '').trim().toLowerCase()
+  const categorySlug = (searchParams.category ?? '').trim().toLowerCase()
 
-type SampleProduct = {
-  sku: string
-  title: string
-  description?: string
-  price?: number
-  url: string
-  imageUrl?: string
-  category?: string
-}
+  const filtered = (products as any[]).filter((p) => {
+    const matchesQ =
+      !q ||
+      String(p.title ?? '').toLowerCase().includes(q) ||
+      String(p.description ?? '').toLowerCase().includes(q)
 
-function normalize(s: string) {
-  return s.trim().toLowerCase()
-}
+    const matchesCategory =
+      !categorySlug || String(p.category ?? '').toLowerCase() === categorySlug
 
-export default async function ProductsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams
-}) {
-  const q = normalize(searchParams.q ?? '')
-  const categorySlug = normalize(searchParams.category ?? '')
+    return matchesQ && matchesCategory
+  })
 
-  const slugToName = new Map(
-    categories.map((c: any) => [normalize(c.slug), String(c.name)] as const)
-  )
-  const categoryName = categorySlug ? slugToName.get(categorySlug) : undefined
-
-  const products = (productsSample as SampleProduct[])
-    .filter((p) => {
-      if (!q) return true
-      const hay = `${p.title ?? ''} ${p.description ?? ''}`.toLowerCase()
-      return hay.includes(q)
-    })
-    .filter((p) => {
-      if (!categorySlug) return true
-      const pCat = normalize(p.category ?? '')
-      // allow either category slug or category display name match
-      return (
-        pCat === categorySlug ||
-        (categoryName ? pCat === normalize(categoryName) : false)
-      )
-    })
+  const categoryOptions = (categories as any[])
+    .filter((c) => !c.parent)
+    .map((c) => ({ slug: c.slug, name: c.name }))
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">All products</h1>
-        <p className="text-slate-600">
-          Browse deals now. (We&apos;ll connect live product feeds after launch.)
+    <div className="container py-10 space-y-6">
+      <header className="space-y-2">
+        <h1 className="text-2xl font-bold">All products</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          Launch-mode product listing (static JSON). When you&apos;re ready, we can switch this to
+          a database + automated ingestion.
         </p>
-      </div>
+      </header>
 
-      <div className="mb-6 flex flex-wrap items-center gap-2">
-        <Link
-          href="/products"
-          className={`rounded-full border px-4 py-2 text-sm ${
-            !categorySlug
-              ? 'border-slate-900 bg-slate-900 text-white'
-              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300'
-          }`}
+      <form className="flex flex-col sm:flex-row gap-3 max-w-2xl" method="GET">
+        <input
+          type="text"
+          name="q"
+          defaultValue={searchParams.q ?? ''}
+          placeholder="Search by name or description"
+          className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sdh-primary/70
+                     dark:bg-sdh-bg-dark dark:border-slate-700 dark:text-sdh-text-dark"
+        />
+
+        <select
+          name="category"
+          defaultValue={searchParams.category ?? ''}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sdh-primary/70
+                     dark:bg-sdh-bg-dark dark:border-slate-700 dark:text-sdh-text-dark"
         >
-          All
-        </Link>
-        {categories.map((c: any) => (
-          <Link
-            key={c.slug}
-            href={`/products?category=${encodeURIComponent(c.slug)}`}
-            className={`rounded-full border px-4 py-2 text-sm ${
-              categorySlug === normalize(c.slug)
-                ? 'border-slate-900 bg-slate-900 text-white'
-                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300'
-            }`}
-          >
-            {c.name}
-          </Link>
-        ))}
-      </div>
+          <option value="">All categories</option>
+          {categoryOptions.map((c) => (
+            <option key={c.slug} value={c.slug}>
+              {c.name}
+            </option>
+          ))}
+        </select>
 
-      {products.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-700">
-          No products matched your search.
-        </div>
+        <button type="submit" className="btn">
+          Search
+        </button>
+      </form>
+
+      {filtered.length === 0 ? (
+        <p className="text-sm text-slate-600 dark:text-slate-400">No products matched that query.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <ProductCard
-              key={p.sku}
-              product={{
-                sku: p.sku,
-                title: p.title,
-                description: p.description ?? '',
-                price: p.price ?? null,
-                url: p.url,
-                imageUrl: p.imageUrl ?? null,
-              }}
-            />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {filtered.slice(0, 48).map((p) => (
+            <ProductCard key={p.sku ?? p.title} p={p} />
           ))}
         </div>
       )}

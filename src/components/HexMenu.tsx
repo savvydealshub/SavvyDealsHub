@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import type React from 'react'
-
+import type { ComponentType } from 'react'
 import {
   FaBolt,
   FaTshirt,
@@ -17,7 +16,7 @@ import {
   FaTools,
 } from 'react-icons/fa'
 
-type IconType = React.ComponentType<{ className?: string }>
+type IconType = ComponentType<{ className?: string }>
 
 type HomeCategory = {
   slug: string

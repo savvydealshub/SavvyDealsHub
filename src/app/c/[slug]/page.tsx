@@ -1,65 +1,67 @@
-import ProductCard from '@/components/ProductCard'
-import categories from '@/data/categories.json'
-import productsSample from '@/data/products-sample.json'
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import categories from '../../../data/categories.json'
+import products from '../../../data/products-sample.json'
+import CategoryGrid from '../../../components/CategoryGrid'
+import { site } from '../../../lib/config'
 
-type Props = { params: { slug: string }; searchParams: { q?: string } }
+type CategoryPageProps = {
+  params: { slug: string }
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const cat = (categories as Array<{ slug: string; name: string }>).find((c) => c.slug === params.slug)
-  if (!cat) return { title: 'Category | SavvyDealsHub' }
+function getCategory(slug: string) {
+  return (categories as any[]).find((c) => c.slug === slug)
+}
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const cat = getCategory(params.slug)
+
+  const name = cat?.name ?? 'Category'
+  const title = `${name} deals | ${site.name}`
+  const description = `Browse the latest ${name} deals on ${site.name}.`
+
+  const baseUrl = site.url.replace(/\/$/, '')
+  const url = `${baseUrl}/c/${params.slug}`
+
   return {
-    title: `${cat.name} Deals | SavvyDealsHub`,
-    description: `Browse ${cat.name} deals and discounts.`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: site.name,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   }
 }
 
-type Product = {
-  sku: string
-  title: string
-  description: string
-  price: number
-  url: string
-  imageUrl?: string
-  category?: string
-}
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const cat = getCategory(params.slug)
+  if (!cat) return <div className="container py-10">Category not found.</div>
 
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const cat = (categories as Array<{ slug: string; name: string }>).find((c) => c.slug === params.slug)
-  if (!cat) notFound()
-
-  const q = (searchParams?.q || '').trim().toLowerCase()
-
-  const products = (productsSample as Product[])
-    .filter((p) => {
-      const pc = (p.category || '').toLowerCase()
-      return pc === cat.name.toLowerCase() || pc === cat.slug.toLowerCase()
-    })
-    .filter((p) => {
-      if (!q) return true
-      const hay = `${p.title} ${p.description} ${p.category || ''}`.toLowerCase()
-      return hay.includes(q)
-    })
+  const items = (products as any[]).filter((p) => String(p.category ?? '') === params.slug)
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{cat.name}</h1>
-          <p className="text-sm text-zinc-500">{products.length} items</p>
-        </div>
-        <Link className="text-sm underline" href="/products">
-          View all products
-        </Link>
-      </div>
+    <div className="container py-10 space-y-6">
+      <header className="space-y-2">
+        <h1 className="text-2xl font-bold">{cat.name}</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          Showing launch-mode products for this category. We can expand this later with full
+          category trees and automated feeds.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((p) => (
-          <ProductCard key={p.sku} product={p} />
-        ))}
-      </div>
-    </main>
+      {items.length === 0 ? (
+        <p className="text-sm text-slate-600 dark:text-slate-400">No products in this category yet.</p>
+      ) : (
+        <CategoryGrid products={items} />
+      )}
+    </div>
   )
 }
