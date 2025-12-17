@@ -1,0 +1,61 @@
+[
+  {
+    "slug": "tech",
+    "name": "Tech & Gadgets"
+  },
+  {
+    "slug": "home",
+    "name": "Home & Kitchen"
+  },
+  {
+    "slug": "outdoors",
+    "name": "Outdoors & Sports"
+  },
+  {
+    "slug": "fashion",
+    "name": "Fashion"
+  },
+  {
+    "slug": "beauty",
+    "name": "Beauty"
+  },
+  {
+    "slug": "pets",
+    "name": "Pets"
+  },
+  {
+    "slug": "laptops",
+    "name": "Laptops",
+    "parent": "tech"
+  },
+  {
+    "slug": "smartphones",
+    "name": "Smartphones",
+    "parent": "tech"
+  },
+  {
+    "slug": "audio",
+    "name": "Headphones & Audio",
+    "parent": "tech"
+  },
+  {
+    "slug": "appliances",
+    "name": "Appliances",
+    "parent": "home"
+  },
+  {
+    "slug": "fitness",
+    "name": "Fitness",
+    "parent": "outdoors"
+  },
+  {
+    "slug": "mens",
+    "name": "Men's Fashion",
+    "parent": "fashion"
+  },
+  {
+    "slug": "womens",
+    "name": "Women's Fashion",
+    "parent": "fashion"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sku": "SKU-AMZ-HUB",
+    "title": "Amazon UK \u2013 Featured Deals Hub",
+    "description": "Jump straight into today\u2019s featured offers and recommendations on Amazon UK.",
+    "price": 0,
+    "imageUrl": "https://picsum.photos/seed/amazondeals/600/400",
+    "url": "https://www.amazon.co.uk/slc/hub?disablePicker=1&shoppingAs=1&encodedActorId=AAAAAAAAAQBQkTjNlTlAtU0Uiy0MgKZQQQAAAAAAAAA%2BLLtL%2Fn3MV6QCd1WoW9ApKgXRNap3Pcus2zEolZZLKErvtoFgPPDl9t8iRo0KxixkSHimuBYxl4aLvJMN4c4vkw%3D%3D&qap=&linkCode=ll2&tag=savvydeals03d-21&linkId=db1ed80609d1cbc027065693fb8082b6&language=en_GB&ref_=as_li_ss_tl",
+    "category": "deals"
+  },
+  {
+    "sku": "SKU-FIRETV-4K",
+    "title": "Fire TV Stick 4K Streaming Device",
+    "description": "4K HDR streaming stick with Alexa Voice Remote \u2013 fast, simple streaming for any TV.",
+    "price": 29.99,
+    "imageUrl": "https://picsum.photos/seed/firetv/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXFIRE4K",
+    "category": "tech"
+  },
+  {
+    "sku": "SKU-ECHO-DOT",
+    "title": "Echo Dot Smart Speaker (Latest Gen)",
+    "description": "Compact smart speaker with Alexa. Play music, control smart home devices and get answers hands\u2011free.",
+    "price": 24.99,
+    "imageUrl": "https://picsum.photos/seed/echodot/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXECHODOT",
+    "category": "smart-home"
+  },
+  {
+    "sku": "SKU-AIRFRYER",
+    "title": "Large Family Air Fryer",
+    "description": "Generous capacity air fryer for chips, chicken and more using little or no oil.",
+    "price": 89.99,
+    "imageUrl": "https://picsum.photos/seed/airfryer/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXXAIRFRYER",
+    "category": "kitchen"
+  },
+  {
+    "sku": "SKU-HEATER",
+    "title": "Portable Electric Heater",
+    "description": "Compact, energy\u2011efficient heater \u2013 ideal for quickly warming bedrooms and home offices.",
+    "price": 39.99,
+    "imageUrl": "https://picsum.photos/seed/heater/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXXHEATER",
+    "category": "home"
+  },
+  {
+    "sku": "SKU-POWERBANK",
+    "title": "20,000mAh Fast-Charge Power Bank",
+    "description": "High\u2011capacity portable charger with multiple USB outputs for phones, tablets and more.",
+    "price": 29.99,
+    "imageUrl": "https://picsum.photos/seed/powerbank/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXXPOWERBANK",
+    "category": "tech"
+  },
+  {
+    "sku": "SKU-EARBUDS",
+    "title": "Wireless Noise\u2011Cancelling Earbuds",
+    "description": "True wireless earbuds with active noise cancellation and long\u2011lasting battery life.",
+    "price": 59.99,
+    "imageUrl": "https://picsum.photos/seed/earbuds/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXEARBUDS",
+    "category": "audio"
+  },
+  {
+    "sku": "SKU-WATERBOTTLE",
+    "title": "Insulated Stainless Steel Water Bottle",
+    "description": "Keeps drinks cold or hot for hours \u2013 ideal for gym, work or travel.",
+    "price": 19.99,
+    "imageUrl": "https://picsum.photos/seed/waterbottle/600/400",
+    "url": "https://www.amazon.co.uk/dp/B0XXXXXWATER",
+    "category": "outdoors"
+  }
+]
