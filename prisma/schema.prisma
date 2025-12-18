@@ -1,33 +1,98 @@
+// Prisma schema for SavvyDealsHub (Postgres/Neon)
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  slug      String    @unique
+  id        Int        @id @default(autoincrement())
+  slug      String     @unique
   name      String
+
   parentId  Int?
-  parent    Category? @relation("Subcategories", fields: [parentId], references: [id])
+  parent    Category?  @relation("Subcategories", fields: [parentId], references: [id])
   children  Category[] @relation("Subcategories")
+
   products  Product[]
-  createdAt DateTime  @default(now())
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Product {
-  id           Int      @id @default(autoincrement())
-  sku          String   @unique
-  title        String
-  description  String
-  price        Float
-  imageUrl     String?
-  url          String   // affiliate url
-  categoryId   Int
-  category     Category @relation(fields: [categoryId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  sku         String   @unique
+  title       String
+  description String
+  price       Float
+  imageUrl    String?
+  url         String   // affiliate URL
+
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Auth tables (NextAuth-compatible)
+// Keep these even if signup is "demo" right now; we’ll wire the API next.
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // For email/password signup (your register page)
+  passwordHash  String?
+
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
