@@ -1,5 +1,10 @@
 [
   {
+    "slug": "deals",
+    "name": "Top Deals",
+    "description": "Today's best value picks across the site"
+  },
+  {
     "slug": "tech",
     "name": "Tech & Gadgets"
   },
@@ -57,5 +62,25 @@
     "slug": "womens",
     "name": "Women's Fashion",
     "parent": "fashion"
+  },
+  {
+    "slug": "gaming",
+    "name": "Gaming",
+    "description": "Consoles, games, accessories, PC gear"
+  },
+  {
+    "slug": "office",
+    "name": "Office",
+    "description": "Office tech, stationery, productivity"
+  },
+  {
+    "slug": "automotive",
+    "name": "Automotive",
+    "description": "Car accessories, tools, maintenance"
+  },
+  {
+    "slug": "toys",
+    "name": "Toys",
+    "description": "Toys, hobbies and gifts"
   }
 ]

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import categories from '../../../data/categories.json'
-import products from '../../../data/products-sample.json'
 import CategoryGrid from '../../../components/CategoryGrid'
 import { site } from '../../../lib/config'
+import { getUiProducts } from '../../../lib/products.server'
 
 type CategoryPageProps = {
   params: { slug: string }
@@ -45,15 +45,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const cat = getCategory(params.slug)
   if (!cat) return <div className="container py-10">Category not found.</div>
 
-  const items = (products as any[]).filter((p) => String(p.category ?? '') === params.slug)
+  const items = await getUiProducts({ categorySlug: params.slug, limit: 60 })
 
   return (
     <div className="container py-10 space-y-6">
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">{cat.name}</h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Showing launch-mode products for this category. We can expand this later with full
-          category trees and automated feeds.
+          Showing products for this category. Outbound links can be wrapped with your affiliate
+          template once your network accounts are approved.
         </p>
       </header>
 

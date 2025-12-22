@@ -11,6 +11,27 @@ export const env = {
     secretKey: process.env.AMAZON_SECRET_KEY || '',
     apiBase: process.env.AMAZON_PARTNER_API_BASE || ''
   },
+  /**
+   * Optional: Wrap outbound product URLs with an affiliate/tracking template.
+   *
+   * Example (EPN rover links — paste your own from the EPN portal once approved):
+   *   https://rover.ebay.com/rover/1/...?...&mpre={{url}}
+   *
+   * The code will replace:
+   *  - {{url}}    -> encodeURIComponent(originalUrl)
+   *  - {{urlRaw}} -> originalUrl
+   */
+  affiliate: {
+    linkTemplate: process.env.AFFILIATE_LINK_TEMPLATE || '',
+  },
+  /**
+   * Used to protect the hourly refresh endpoint.
+   * Call /api/cron/refresh with: Authorization: Bearer <CRON_SECRET>
+   */
+  cron: {
+    secret: process.env.CRON_SECRET || '',
+    feedUrl: process.env.DEALS_FEED_URL || '',
+  },
   paypal: {
     webhookId: process.env.PAYPAL_WEBHOOK_ID || '',
     clientId: process.env.PAYPAL_CLIENT_ID || '',

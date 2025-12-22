@@ -1,6 +1,6 @@
 import ProductCard from '../../components/ProductCard'
-import products from '../../data/products-sample.json'
 import categories from '../../data/categories.json'
+import { getUiProducts } from '../../lib/products.server'
 
 type ProductsPageProps = {
   searchParams: {
@@ -13,16 +13,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const q = (searchParams.q ?? '').trim().toLowerCase()
   const categorySlug = (searchParams.category ?? '').trim().toLowerCase()
 
-  const filtered = (products as any[]).filter((p) => {
-    const matchesQ =
-      !q ||
-      String(p.title ?? '').toLowerCase().includes(q) ||
-      String(p.description ?? '').toLowerCase().includes(q)
-
-    const matchesCategory =
-      !categorySlug || String(p.category ?? '').toLowerCase() === categorySlug
-
-    return matchesQ && matchesCategory
+  const filtered = await getUiProducts({
+    q: q || undefined,
+    categorySlug: categorySlug || undefined,
+    limit: 60,
   })
 
   const categoryOptions = (categories as any[])
@@ -34,8 +28,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">All products</h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Launch-mode product listing (static JSON). When you&apos;re ready, we can switch this to
-          a database + automated ingestion.
+          Live product listing. Products are served from your database when configured, and fall
+          back to the bundled sample feed if the database is unavailable.
         </p>
       </header>
 

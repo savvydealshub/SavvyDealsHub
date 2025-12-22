@@ -13,6 +13,9 @@ export default function ProductCard(props: ProductCardProps) {
 
   const href = affiliateUrl(p.url)
 
+  const price = Number(p.price ?? 0)
+  const showPrice = Number.isFinite(price) && price > 0
+
   return (
     <div className="card">
       {p.imageUrl && (
@@ -22,8 +25,15 @@ export default function ProductCard(props: ProductCardProps) {
       )}
       <h3 className="font-semibold line-clamp-2">{p.title}</h3>
       <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-3">{p.description}</p>
-      <div className="mt-2 font-bold">£{Number(p.price ?? 0).toFixed(2)}</div>
-      <Link href={href} className="btn mt-3 inline-block text-center bg-black text-white">
+      <div className="mt-2 font-bold">
+        {showPrice ? `£${price.toFixed(2)}` : 'Check price'}
+      </div>
+      <Link
+        href={href}
+        className="btn mt-3 inline-block text-center bg-black text-white"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         View Deal
       </Link>
     </div>
