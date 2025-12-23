@@ -12,9 +12,24 @@ type Consent = {
 const STORAGE_KEY = 'sdh_cookie_consent'
 const CONSENT_EVENT = 'sdh-cookie-consent-changed'
 
+const COOKIE_NAME = 'sdh_cookie_consent'
+
+function parseCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const cookies = document.cookie ? document.cookie.split(';') : []
+  for (const c of cookies) {
+    const [k, ...rest] = c.trim().split('=')
+    if (k === name) return rest.join('=')
+  }
+  return null
+}
+
 function readStoredConsent(): Consent | null {
   if (typeof window === 'undefined') return null
-  const raw = window.localStorage.getItem(STORAGE_KEY)
+  const raw = window.localStorage.getItem(STORAGE_KEY) || (() => {
+    const c = parseCookie(COOKIE_NAME)
+    return c ? decodeURIComponent(c) : null
+  })()
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw)
@@ -57,6 +72,24 @@ export default function ConsentScriptLoader() {
       window.removeEventListener('storage', storageHandler)
     }
   }, [])
+
+  // If scripts are already loaded and the user later changes consent, update Google Consent Mode if available.
+  useEffect(() => {
+    if (!consent) return
+    const anyWindow = window as any
+    if (typeof anyWindow.gtag === 'function') {
+      try {
+        anyWindow.gtag('consent', 'update', {
+          analytics_storage: consent.analytics ? 'granted' : 'denied',
+          ad_storage: consent.marketing ? 'granted' : 'denied',
+          ad_user_data: consent.marketing ? 'granted' : 'denied',
+          ad_personalization: consent.marketing ? 'granted' : 'denied',
+        })
+      } catch {
+        // ignore
+      }
+    }
+  }, [consent])
 
   if (!consent) {
     // No explicit choice yet, so we avoid loading non-essential scripts.

@@ -1,13 +1,10 @@
 import HexMenu from '../components/HexMenu'
+import CategoryGrid from '../components/CategoryGrid'
+import { getUiProducts } from '../lib/products.server'
 
-const demoDeals = [
-  { id: 1, badgeColor: '#ffb020' },
-  { id: 2, badgeColor: '#ff6a1a' },
-  { id: 3, badgeColor: '#22c55e' },
-  { id: 4, badgeColor: '#f97316' },
-]
-
-export default function Home() {
+export default async function Home() {
+  // Pull real deals from DB if available, otherwise from src/data/products-sample.json
+  const topDeals = await getUiProducts({ categorySlug: 'deals', limit: 12 })
   return (
     <div className="space-y-12">
       <section className="text-center space-y-4 pt-10">
@@ -49,28 +46,13 @@ export default function Home() {
         <h2 className="text-2xl font-bold text-sdh-primary dark:text-sdh-text-dark mb-6">
           Today&apos;s Top Deals
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {demoDeals.map((deal) => (
-            <article key={deal.id} className="card flex flex-col gap-4 dark:bg-[#151820]">
-              <div
-                className="inline-flex items-center px-3 py-1 rounded-pill text-xs font-semibold text-white self-start"
-                style={{ backgroundColor: deal.badgeColor }}
-              >
-                SAVE 30%
-              </div>
-              <div className="h-32 md:h-40 rounded-2xl bg-slate-100 dark:bg-[#1d212b] flex items-center justify-center">
-                <span className="text-slate-400 text-sm dark:text-slate-500">
-                  Product image
-                </span>
-              </div>
-              <div>
-                <button className="text-sdh-primary dark:text-sdh-text-dark font-semibold text-sm md:text-base hover:underline">
-                  Product name
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+        {topDeals.length === 0 ? (
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            No deals loaded yet. Check back shortly.
+          </p>
+        ) : (
+          <CategoryGrid products={topDeals} />
+        )}
       </section>
     </div>
   )

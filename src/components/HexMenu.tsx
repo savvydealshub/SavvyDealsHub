@@ -26,17 +26,19 @@ type HomeCategory = {
 }
 
 const HOME_CATEGORIES: HomeCategory[] = [
-  { slug: 'todays-deals', label: "Today’s Deals", color: '#ff6a1a', Icon: FaBolt },
-  { slug: 'clothing', label: 'Clothing', color: '#ffb020', Icon: FaTshirt },
-  { slug: 'home-kitchen', label: 'Home & Kitchen', color: '#34b34a', Icon: FaCouch },
-  { slug: 'sports', label: 'Sports', color: '#008fbd', Icon: FaMobileAlt },
-  { slug: 'automotive', label: 'Automotive', color: '#00a3a3', Icon: FaCarSide },
-  { slug: 'toys-baby', label: 'Toys & Baby', color: '#ff6a55', Icon: FaBaby },
-  { slug: 'health-beauty', label: 'Health & Beauty', color: '#ff4b5c', Icon: FaHeart },
-  { slug: 'pet-supplies', label: 'Pet Supplies', color: '#34b34a', Icon: FaPaw },
-  { slug: 'grocery', label: 'Grocery', color: '#ff6a1a', Icon: FaShoppingCart },
-  { slug: 'office-supplies', label: 'Office Supplies', color: '#008fbd', Icon: FaBriefcase },
-  { slug: 'tools-hardware', label: 'Tools & Hardware', color: '#2563eb', Icon: FaTools },
+  // IMPORTANT: These slugs MUST exist in src/data/categories.json (or your DB categories)
+  // otherwise users will hit "Category not found".
+  { slug: 'deals', label: "Today’s Deals", color: '#ff6a1a', Icon: FaBolt },
+  { slug: 'tech', label: 'Tech & Gadgets', color: '#008fbd', Icon: FaMobileAlt },
+  { slug: 'home', label: 'Home & Kitchen', color: '#34b34a', Icon: FaCouch },
+  { slug: 'fashion', label: 'Fashion', color: '#ffb020', Icon: FaTshirt },
+  { slug: 'outdoors', label: 'Outdoors & Sports', color: '#00a3a3', Icon: FaHeart },
+  { slug: 'toys', label: 'Toys & Games', color: '#ff6a55', Icon: FaBaby },
+  { slug: 'beauty', label: 'Health & Beauty', color: '#ff4b5c', Icon: FaHeart },
+  { slug: 'pets', label: 'Pet Supplies', color: '#34b34a', Icon: FaPaw },
+  { slug: 'office', label: 'Office Supplies', color: '#008fbd', Icon: FaBriefcase },
+  { slug: 'automotive', label: 'Automotive', color: '#2563eb', Icon: FaCarSide },
+  { slug: 'gaming', label: 'Gaming', color: '#ff6a1a', Icon: FaShoppingCart },
 ]
 
 // Softer, slightly rounded hexagon shape

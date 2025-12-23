@@ -14,24 +14,39 @@ export default function PrivacyPage() {
         </p>
       </div>
 
-      <div className="space-y-3 text-sm leading-relaxed text-gray-700">
+      <div className="space-y-4 text-sm leading-relaxed text-gray-700">
         <p>
-          We use <span className="font-medium">strictly necessary cookies</span> to keep the site
-          secure and functioning. For example, these cookies may remember your session, your basket
-          and basic preferences. These cookies are always on and do not require consent.
+          We use <span className="font-medium">strictly necessary cookies</span> to keep the site secure
+          and functioning. These are always on and do not require consent.
+        </p>
+
+        <div className="rounded-2xl border border-slate-200 p-4 bg-white">
+          <h2 className="font-semibold mb-2">Cookie categories</h2>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <span className="font-medium">Necessary</span> – required for core site features (security, page
+              navigation, load balancing, remembering your cookie choice).
+            </li>
+            <li>
+              <span className="font-medium">Analytics</span> – helps us understand what’s popular and improve the
+              site (for example, aggregate visitor metrics).
+            </li>
+            <li>
+              <span className="font-medium">Marketing</span> – used for advertising/affiliate measurement and ad
+              personalisation.
+            </li>
+          </ul>
+        </div>
+
+        <p>
+          We only load non-essential scripts (analytics and advertising) <span className="font-medium">after you’ve
+          given consent</span> via the cookie banner. If you choose “Reject non-essential”, analytics/marketing
+          scripts won’t load.
         </p>
 
         <p>
-          With your permission, we also use <span className="font-medium">analytics cookies</span> to
-          understand how people use SavvyDealsHub (for example, which pages are most popular) and{' '}
-          <span className="font-medium">marketing cookies</span> to support advertising and affiliate
-          links. These cookies help us earn revenue and keep the service running, but they are
-          optional and only set when you choose &quot;Accept all cookies&quot; in the cookie banner.
-        </p>
-
-        <p>
-          Your cookie choice is stored using a small piece of data in your browser so we can remember
-          it on future visits. You can change this choice at any time by using the{' '}
+          Your choice is stored in your browser (localStorage and a small first‑party cookie) so we can remember it
+          on future visits. You can change or withdraw consent at any time using the{' '}
           <span className="font-medium">Cookie settings</span> link in the footer.
         </p>
 

@@ -28,6 +28,18 @@ export default function Footer() {
           >
             Privacy &amp; Cookies
           </a>
+          <a
+            href="/terms"
+            className="underline underline-offset-2 hover:text-gray-900"
+          >
+            Terms
+          </a>
+          <a
+            href="/affiliate-disclosure"
+            className="underline underline-offset-2 hover:text-gray-900"
+          >
+            Affiliate disclosure
+          </a>
         </div>
       </div>
     </footer>
