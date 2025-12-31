@@ -29,7 +29,7 @@ async function main() {
   }
 
   // Products
-  for (const p of products) {
+  for (const p of (products as any).items ?? products) {
     const categoryId = slugId[p.category] ?? Object.values(slugId)[0]
     await prisma.product.upsert({
       where: { sku: p.sku },
