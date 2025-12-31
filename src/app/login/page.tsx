@@ -67,7 +67,9 @@ export default function LoginPage() {
           <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
             <span>
               New here?{' '}
-              {/* Registration disabled for launch */} 
+              <Link href="/register" className="underline underline-offset-2">
+                Create an account
+              </Link>
             </span>
           </div>
 
