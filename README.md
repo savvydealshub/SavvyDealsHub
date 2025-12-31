@@ -40,3 +40,9 @@ Edit **.env** (single place for tokens/IDs). Frontend public keys start with `NE
 - Daily email report: `npm run report:daily`
 
 > Replace stubs with your real providers as needed. All code is ready to extend.
+
+
+## Deals data policy (important)
+- This project **does not scrape arbitrary websites**.
+- Only ingest data from feeds/APIs you are authorized to use (affiliate networks, your own feeds).
+- Add remote feeds via `DEALS_FEED_URLS` (comma-separated JSON endpoints).

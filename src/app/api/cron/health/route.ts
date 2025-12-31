@@ -1,33 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
+import { getFeedCacheStatus } from '@/lib/products.server'
 
-import { prisma } from "@/lib/db";
+export const dynamic = 'force-dynamic'
 
-/**
- * Lightweight health endpoint for monitoring.
- * Protected with CRON_SECRET to avoid public scraping.
- *
- * Example:
- *   GET /api/cron/health?token=YOUR_SECRET
- */
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const token = url.searchParams.get("token") || "";
-  const secret = process.env.CRON_SECRET || "";
+  const url = new URL(req.url)
+  const token = url.searchParams.get('token')
 
-  if (!secret || token !== secret) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ ok: false, error: 'CRON_SECRET not set' }, { status: 500 })
   }
 
-  // Keep the query very cheap.
-  const [categories, products] = await Promise.all([
-    prisma.category.count(),
-    prisma.product.count(),
-  ]);
+  if (!token || token !== process.env.CRON_SECRET) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 })
+  }
 
-  return NextResponse.json({
-    ok: true,
-    categories,
-    products,
-    timestamp: new Date().toISOString(),
-  });
+  return NextResponse.json({ ok: true, status: getFeedCacheStatus(), ts: new Date().toISOString() })
 }

@@ -2,127 +2,160 @@ import 'server-only'
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { db } from './db'
 
 export type UiProduct = {
-  id: string
+  sku: string
   title: string
-  description?: string | null
-  price: number
-  imageUrl?: string | null
+  description?: string
+  price?: number
+  imageUrl?: string
   url: string
   category: string
-  merchant?: string | null
-  updatedAt?: string | null
+  // Optional: for member pricing
+  shippingPrice?: number
+  shippingIncluded?: boolean
+  source?: string
 }
 
-export type UiCategory = {
-  slug: string
-  name: string
-  description?: string | null
+type GetProductsArgs = {
+  categorySlug?: string | null
+  q?: string | null
+  limit?: number | null
 }
 
-function readJsonFile<T>(relative: string): T {
-  const file = path.join(process.cwd(), relative)
-  const raw = fs.readFileSync(file, 'utf-8')
-  return JSON.parse(raw) as T
+/**
+ * JSON-only product provider.
+ * - Reads local seed JSON (src/data/products-sample.json)
+ * - Optionally merges remote JSON feeds you own/control (DEALS_FEED_URLS)
+ * - Uses a simple in-memory TTL cache for remote feeds to keep it fast on Amplify.
+ *
+ * IMPORTANT: We intentionally do NOT "scan" arbitrary websites.
+ * Only consume:
+ *  - Your own feeds
+ *  - Affiliate network feeds / APIs you are authorized to use
+ */
+const localProductsPath = path.join(process.cwd(), 'src', 'data', 'products-sample.json')
+
+const cache: {
+  fetchedAt: number
+  items: UiProduct[]
+  error?: string
+} = {
+  fetchedAt: 0,
+  items: [],
 }
 
-export async function getCategories(): Promise<UiCategory[]> {
-  const jsonCats = readJsonFile<UiCategory[]>('src/data/categories.json')
-
+function readLocalProducts(): UiProduct[] {
   try {
-    const dbCats = await db.category.findMany({
-      orderBy: { name: 'asc' },
-      select: { slug: true, name: true, description: true },
-    })
+    const raw = fs.readFileSync(localProductsPath, 'utf-8')
+    const parsed = JSON.parse(raw)
+    // Support either:
+    //  - { items: [...] }
+    //  - [ ... ]
+    const items = Array.isArray(parsed) ? parsed : parsed?.items
+    return Array.isArray(items) ? items : []
+  } catch {
+    return []
+  }
+}
 
-    // If DB has categories, merge in any missing JSON categories (prevents missing routes like /c/deals)
-    if (dbCats.length) {
-      const seen = new Set(dbCats.map((c) => c.slug))
-      const merged = [...dbCats]
-      for (const c of jsonCats) {
-        if (!seen.has(c.slug)) merged.push(c)
+function envNumber(name: string, fallback: number) {
+  const v = process.env[name]
+  if (!v) return fallback
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function envList(name: string): string[] {
+  const v = (process.env[name] ?? '').trim()
+  if (!v) return []
+  return v.split(',').map(s => s.trim()).filter(Boolean)
+}
+
+async function fetchRemoteFeeds(): Promise<UiProduct[]> {
+  const urls = envList('DEALS_FEED_URLS')
+  if (urls.length === 0) return []
+
+  const ttl = envNumber('DEALS_FEED_TTL_SECONDS', 1800) * 1000
+  const now = Date.now()
+  if (cache.items.length > 0 && now - cache.fetchedAt < ttl) return cache.items
+
+  const merged: UiProduct[] = []
+  const errors: string[] = []
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' })
+      if (!res.ok) {
+        errors.push(`${url} -> HTTP ${res.status}`)
+        continue
       }
-      // Keep stable order
-      return merged.sort((a, b) => a.name.localeCompare(b.name))
+      const data = await res.json()
+      const items = Array.isArray(data) ? data : data?.items
+      if (Array.isArray(items)) {
+        for (const it of items) {
+          if (it?.sku && it?.title && it?.url && it?.category) {
+            merged.push({ ...it, source: it.source ?? url })
+          }
+        }
+      }
+    } catch (e: any) {
+      errors.push(`${url} -> ${e?.message ?? 'fetch failed'}`)
     }
-  } catch {
-    // ignore and fallback
   }
 
-  return jsonCats
+  cache.fetchedAt = now
+  cache.items = merged
+  cache.error = errors.length ? errors.join(' | ') : undefined
+  return merged
 }
 
-export async function getProducts(opts?: {
-  categorySlug?: string
-  q?: string
-  limit?: number
-}): Promise<UiProduct[]> {
-  const categorySlug = opts?.categorySlug
-  const q = opts?.q?.trim()
-  const limit = Math.min(Math.max(opts?.limit ?? 60, 1), 200)
+function normalize(s: string) {
+  return s.toLowerCase().trim()
+}
 
-  try {
-    const rows = await db.product.findMany({
-      where: {
-        ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-        ...(q
-          ? {
-              OR: [
-                { title: { contains: q, mode: 'insensitive' } },
-                { description: { contains: q, mode: 'insensitive' } },
-              ],
-            }
-          : {}),
-      },
-      orderBy: { updatedAt: 'desc' },
-      take: limit,
-      select: {
-        sku: true,
-        title: true,
-        description: true,
-        price: true,
-        imageUrl: true,
-        url: true,
-        merchant: true,
-        updatedAt: true,
-        category: { select: { slug: true } },
-      },
-    })
+export async function getUiProducts(args: GetProductsArgs = {}): Promise<UiProduct[]> {
+  const local = readLocalProducts()
+  const remote = await fetchRemoteFeeds()
+  const all = [...remote, ...local]
 
-    if (rows.length) {
-      return rows.map((r) => ({
-        id: r.sku,
-        title: r.title,
-        description: r.description,
-        price: r.price,
-        imageUrl: r.imageUrl,
-        url: r.url,
-        merchant: r.merchant,
-        category: r.category.slug,
-        updatedAt: r.updatedAt?.toISOString() ?? null,
-      }))
+  const q = args.q ? normalize(args.q) : ''
+  const category = args.categorySlug ? normalize(args.categorySlug) : ''
+  const limit = args.limit && args.limit > 0 ? args.limit : 200
+
+  let filtered = all
+
+  if (category) {
+    // deals is a special "top picks" aggregator
+    if (category !== 'deals') {
+      filtered = filtered.filter(p => normalize(p.category) === category)
     }
-  } catch {
-    // ignore and fallback
   }
 
-  // Sample data can be either an array or an object like { items: [...] }
-  const sampleRaw = readJsonFile<any>('src/data/products-sample.json')
-  const sample: any[] = Array.isArray(sampleRaw)
-    ? sampleRaw
-    : Array.isArray(sampleRaw?.items)
-      ? sampleRaw.items
-      : []
+  if (q) {
+    filtered = filtered.filter(p => {
+      const hay = `${p.title ?? ''} ${p.description ?? ''} ${p.sku ?? ''}`.toLowerCase()
+      return hay.includes(q)
+    })
+  }
 
-  const filtered = sample.filter((p) => {
-    if (categorySlug && p.category !== categorySlug) return false
-    if (q && !(String(p.title ?? '').toLowerCase().includes(q.toLowerCase()) || String(p.description ?? '').toLowerCase().includes(q.toLowerCase()))) return false
-    return true
-  })
+  // Basic ranking:
+  // - If /c/deals: prefer items with price set (and lower prices), then recent ordering of JSON
+  if (category === 'deals') {
+    filtered = filtered
+      .slice()
+      .sort((a, b) => (Number(a.price ?? 999999) - Number(b.price ?? 999999)))
+  }
+
   return filtered.slice(0, limit)
 }
 
-// Backwards-friendly alias for calling code
-export const getUiProducts = getProducts
+export function clearFeedCache() {
+  cache.fetchedAt = 0
+  cache.items = []
+  cache.error = undefined
+}
+
+export function getFeedCacheStatus() {
+  return { fetchedAt: cache.fetchedAt, count: cache.items.length, error: cache.error }
+}

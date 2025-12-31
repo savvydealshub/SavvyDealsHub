@@ -1,3 +1,1 @@
-# ads.txt for SavvyDealsHub
-# Add your AdSense seller line after approval. Example:
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-3051610197061559, DIRECT, f08c47fec0942fa0

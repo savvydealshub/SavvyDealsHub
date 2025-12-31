@@ -11,6 +11,7 @@ const title = site.name
 const description = `${site.name} — the smartest way to find great deals.`
 
 export const metadata: Metadata = {
+  other: { 'google-adsense-account': 'ca-pub-3051610197061559' },
   metadataBase: new URL(site.url),
   title: {
     default: title,
