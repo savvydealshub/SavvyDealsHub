@@ -144,7 +144,7 @@ export async function getUiProducts(args: GetProductsArgs = {}): Promise<UiProdu
   if (category === 'deals') {
     filtered = filtered
       .slice()
-      .sort((a, b) => (Number(a.price ?? 999999) - Number(b.price ?? 999999)))
+      .sort((a, b) => Number(a.price ?? 999999) - Number(b.price ?? 999999))
   }
 
   return filtered.slice(0, limit)
@@ -158,4 +158,32 @@ export function clearFeedCache() {
 
 export function getFeedCacheStatus() {
   return { fetchedAt: cache.fetchedAt, count: cache.items.length, error: cache.error }
+}
+
+export type CategoryItem = {
+  slug: string
+  name: string
+  count: number
+}
+
+/**
+ * Returns category list derived from the current UI products.
+ * Used by category pages /c/[slug].
+ */
+export async function getCategories(): Promise<CategoryItem[]> {
+  const products = await getUiProducts({ limit: 2000 })
+
+  const map = new Map<string, { name: string; count: number }>()
+  for (const p of products) {
+    const slug = (p.category || '').toString().trim()
+    if (!slug) continue
+
+    const cur = map.get(slug)
+    if (cur) cur.count += 1
+    else map.set(slug, { name: slug, count: 1 })
+  }
+
+  return Array.from(map.entries())
+    .map(([slug, v]) => ({ slug, name: v.name, count: v.count }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }

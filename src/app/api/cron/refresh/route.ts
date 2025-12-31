@@ -3,13 +3,21 @@ import { clearFeedCache, getFeedCacheStatus } from '@/lib/products.server'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Lightweight "cron" endpoint to refresh deals.
+ * For JSON-only feeds, "refresh" just clears cache so the next request re-fetches.
+ *
+ * Usage:
+ *  /api/cron/refresh?token=YOUR_SECRET
+ *
+ * Secret:
+ *  - Prefer CRON_SECRET
+ *  - Fallback to INGEST_SECRET
+ */
 export async function GET(req: Request) {
   const url = new URL(req.url)
-
-  // Accept token from either ?token= or ?secret=
   const token = url.searchParams.get('token') ?? url.searchParams.get('secret')
 
-  // Use CRON_SECRET if set, otherwise fallback to INGEST_SECRET
   const expected = process.env.CRON_SECRET || process.env.INGEST_SECRET
 
   if (!expected) {
