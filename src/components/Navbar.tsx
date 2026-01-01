@@ -42,20 +42,23 @@ export default function Navbar() {
                   href="/login"
                   className="block px-4 py-2 text-sm text-sdh-text hover:bg-sdh-bg dark:text-sdh-text-dark dark:hover:bg-sdh-bg-dark/70"
                 >
-                  Login / Register
+                  Login
                 </Link>
+
                 <Link
                   href="/about"
                   className="block px-4 py-2 text-sm text-sdh-text hover:bg-sdh-bg dark:text-sdh-text-dark dark:hover:bg-sdh-bg-dark/70"
                 >
                   About Us
                 </Link>
+
                 <Link
                   href="/contact"
                   className="block px-4 py-2 text-sm text-sdh-text hover:bg-sdh-bg dark:text-sdh-text-dark dark:hover:bg-sdh-bg-dark/70"
                 >
                   Contact
                 </Link>
+
                 <Link
                   href="/help"
                   className="block px-4 py-2 text-sm text-sdh-text hover:bg-sdh-bg dark:text-sdh-text-dark dark:hover:bg-sdh-bg-dark/70"
