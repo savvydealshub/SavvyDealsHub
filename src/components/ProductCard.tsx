@@ -23,7 +23,18 @@ export default function ProductCard(props: ProductCardProps) {
           <Image src={p.imageUrl} alt={p.title} fill className="object-cover" />
         </div>
       )}
-      <h3 className="font-semibold line-clamp-2">{p.title}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-semibold line-clamp-2 flex-1">{p.title}</h3>
+        {p.category ? (
+          <Link
+            href={`/c/${String(p.category).toLowerCase()}`}
+            className="text-[11px] px-2 py-1 rounded-full bg-sdh-primary/10 text-sdh-primary dark:bg-slate-700 dark:text-sdh-text-dark whitespace-nowrap"
+            title="Browse this category"
+          >
+            {String(p.category).replace(/-/g, ' ')}
+          </Link>
+        ) : null}
+      </div>
       <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-3">{p.description}</p>
       <div className="mt-2 font-bold">
         {showPrice ? `£${price.toFixed(2)}` : 'Check price'}

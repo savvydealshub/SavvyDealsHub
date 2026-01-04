@@ -42,6 +42,12 @@ export default function Navbar() {
                 <Link href="/products" className="block px-4 py-2 text-sm hover:bg-sdh-bg dark:hover:bg-sdh-bg-dark/70">
                   Products
                 </Link>
+                <Link href="/c" className="block px-4 py-2 text-sm hover:bg-sdh-bg dark:hover:bg-sdh-bg-dark/70">
+                  Categories
+                </Link>
+                <Link href="/compare" className="block px-4 py-2 text-sm hover:bg-sdh-bg dark:hover:bg-sdh-bg-dark/70">
+                  Compare (True Price)
+                </Link>
                 <Link href="/about" className="block px-4 py-2 text-sm hover:bg-sdh-bg dark:hover:bg-sdh-bg-dark/70">
                   About Us
                 </Link>

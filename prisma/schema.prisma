@@ -41,6 +41,101 @@ model Product {
   updatedAt   DateTime @updatedAt
 }
 
+// --- True Price Comparison: Offers uploaded via authorised feeds (CSV/JSON/APIs) ---
+// We keep `Product` above for the existing site catalogue.
+// `Offer` is the comparison engine input: it can contain multiple retailer listings per product.
+
+enum OfferCondition {
+  New
+  Used
+  Refurbished
+  Unknown
+}
+
+enum RetailerMembership {
+  AMAZON_PRIME
+  NECTAR
+  CLUBCARD
+}
+
+model Offer {
+  id                 Int               @id @default(autoincrement())
+
+  // A stable identifier you control (e.g. barcode/MPN/retailer SKU). Required for dedupe.
+  sku                String
+  title              String
+  description        String?
+  category           String
+
+  // Retailer listing data
+  retailer           String
+  url                String
+  imageUrl           String?
+
+  // Prices
+  price              Float?
+  shippingPrice      Float?
+  shippingIncluded   Boolean           @default(false)
+
+  // Metadata
+  condition          OfferCondition    @default(Unknown)
+  membershipRequired Boolean           @default(false)
+  membershipType     RetailerMembership?
+
+  // Sponsored placements (OFF by default; always labelled if enabled)
+  isSponsored        Boolean           @default(false)
+  sponsorLabel       String?
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  clicks             ClickEvent[]
+  snapshots          OfferPriceSnapshot[]
+
+  @@unique([sku, retailer, url])
+  @@index([category])
+}
+
+// --- Offer Freshness & Price History ---
+// We store lightweight snapshots of offer price components over time.
+// This powers "biggest drops", trend views, and more accurate alerts later.
+model OfferPriceSnapshot {
+  id               Int      @id @default(autoincrement())
+
+  offerId          Int
+  offer            Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  price            Float?
+  shippingPrice    Float?
+  shippingIncluded Boolean  @default(false)
+
+  capturedAt       DateTime @default(now())
+
+  @@index([capturedAt])
+  @@index([offerId, capturedAt])
+}
+
+// --- Revenue Intelligence ---
+// Minimal, GDPR-safe click events for outbound clicks.
+// We intentionally store no IP, no cookie IDs, and no user agents.
+model ClickEvent {
+  id        Int      @id @default(autoincrement())
+
+  offerId   Int
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  retailer  String
+  category  String
+  source    String?
+  cta       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([retailer])
+  @@index([category])
+}
+
 // Auth tables (NextAuth-compatible)
 // Keep these even if signup is "demo" right now; we’ll wire the API next.
 model User {

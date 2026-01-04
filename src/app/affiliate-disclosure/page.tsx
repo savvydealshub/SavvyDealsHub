@@ -26,6 +26,12 @@ export default function AffiliateDisclosurePage() {
         </p>
 
         <p>
+          We aim to rank and present offers based on <span className="font-medium">value and relevance</span> (for
+          example, the lowest total price to your door when totals are available). We do not accept payment to hide
+          cheaper options.
+        </p>
+
+        <p>
           We aim to recommend deals and products based on value and relevance. Merchants can change pricing,
           availability and terms at any time, so please check the final details on the merchant site.
         </p>

@@ -1,6 +1,29 @@
+import type { Metadata } from 'next'
 import HexMenu from '../components/HexMenu'
 import CategoryGrid from '../components/CategoryGrid'
+import FeaturedCategories from '../components/FeaturedCategories'
+import { site } from '../lib/config'
 import { getUiProducts } from '../lib/products.server'
+
+export const metadata: Metadata = {
+  title: `Smart deals & true-price comparison | ${site.name}`,
+  description: `Compare real delivered prices (including delivery and retailer memberships like Prime/Nectar/Clubcard) and find the smartest deals with ${site.name}.`,
+  alternates: { canonical: `${site.url.replace(/\/$/, '')}/` },
+  openGraph: {
+    title: `Smart deals & true-price comparison | ${site.name}`,
+    description: `Compare real delivered prices and find the smartest deals with ${site.name}.`,
+    url: `${site.url.replace(/\/$/, '')}/`,
+    siteName: site.name,
+    type: 'website',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `${site.name} — Smart deals` }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `Smart deals & true-price comparison | ${site.name}`,
+    description: `Compare real delivered prices and find the smartest deals with ${site.name}.`,
+    images: ['/opengraph-image'],
+  },
+}
 
 export default async function Home() {
   // Pull real deals from DB if available, otherwise from src/data/products-sample.json
@@ -36,10 +59,43 @@ export default async function Home() {
           </form>
         </div>
 
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+          <a href="/compare" className="btn px-5 py-2 rounded-full">
+            Compare true prices
+          </a>
+          <a
+            href="/c"
+            className="btn-outline px-5 py-2 rounded-full border border-slate-200 dark:border-slate-800"
+          >
+            Browse categories
+          </a>
+          <a
+            href="/how-pricing-works"
+            className="text-sm text-sdh-text-muted dark:text-sdh-text-dark/80 underline underline-offset-4 self-center"
+          >
+            How pricing works
+          </a>
+        </div>
+
         <div className="pt-10">
 
           <HexMenu />
         </div>
+      </section>
+
+      <section className="container">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-sdh-primary dark:text-sdh-text-dark">
+            Featured categories
+          </h2>
+          <a
+            href="/c"
+            className="text-sm text-sdh-text-muted dark:text-sdh-text-dark/80 underline underline-offset-4"
+          >
+            View all
+          </a>
+        </div>
+        <FeaturedCategories />
       </section>
 
       <section className="container pb-16">

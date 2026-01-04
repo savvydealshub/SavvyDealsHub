@@ -3,7 +3,11 @@ import 'server-only'
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { safeParseFeedItems } from './domain/schemas'
+
 export type UiProduct = {
+  /** Optional: database Offer id (present for uploaded CSV/API offers). */
+  offerId?: number
   sku: string
   title: string
   description?: string
@@ -14,7 +18,12 @@ export type UiProduct = {
   // Optional: for member pricing
   shippingPrice?: number
   shippingIncluded?: boolean
+  /** Sponsored placement (OFF by default; always labelled if enabled). */
+  isSponsored?: boolean
+  sponsorLabel?: string
   source?: string
+  /** ISO timestamp (if supplied by an authorised feed / DB row). */
+  updatedAt?: string
 }
 
 type GetProductsArgs = {
@@ -49,11 +58,7 @@ function readLocalProducts(): UiProduct[] {
   try {
     const raw = fs.readFileSync(localProductsPath, 'utf-8')
     const parsed = JSON.parse(raw)
-    // Support either:
-    //  - { items: [...] }
-    //  - [ ... ]
-    const items = Array.isArray(parsed) ? parsed : parsed?.items
-    return Array.isArray(items) ? items : []
+    return safeParseFeedItems(parsed)
   } catch {
     return []
   }
@@ -91,14 +96,8 @@ async function fetchRemoteFeeds(): Promise<UiProduct[]> {
         continue
       }
       const data = await res.json()
-      const items = Array.isArray(data) ? data : data?.items
-      if (Array.isArray(items)) {
-        for (const it of items) {
-          if (it?.sku && it?.title && it?.url && it?.category) {
-            merged.push({ ...it, source: it.source ?? url })
-          }
-        }
-      }
+      const parsed = safeParseFeedItems(data)
+      for (const it of parsed) merged.push({ ...it, source: it.source ?? url })
     } catch (e: any) {
       errors.push(`${url} -> ${e?.message ?? 'fetch failed'}`)
     }

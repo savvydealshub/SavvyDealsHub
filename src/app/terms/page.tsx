@@ -33,6 +33,11 @@ export default function TermsPage() {
           guarantee accuracy at all times. Always verify final pricing and terms on the merchant’s website.
         </p>
 
+        <p>
+          If you use our “True Price Comparison” features, delivery costs and totals may be estimates unless the
+          retailer provides exact values. See <a className="underline underline-offset-2" href="/how-pricing-works">How pricing works</a> for details.
+        </p>
+
         <h2 className="text-lg font-semibold">Acceptable use</h2>
         <p>
           You agree not to misuse the site (for example, by attempting to disrupt service, scrape at harmful

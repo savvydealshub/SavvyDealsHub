@@ -1,6 +1,15 @@
+import type { Metadata } from 'next'
 import ProductCard from '../../components/ProductCard'
 import categories from '../../data/categories.json'
+import { site } from '../../lib/config'
 import { getUiProducts } from '../../lib/products.server'
+
+export const metadata: Metadata = {
+  title: 'Products',
+  description:
+    'Browse products and deals on SavvyDealsHub. Use Compare to calculate delivery and membership impact for the true total price.',
+  alternates: { canonical: `${site.url.replace(/\/$/, '')}/products` },
+}
 
 type ProductsPageProps = {
   searchParams: {

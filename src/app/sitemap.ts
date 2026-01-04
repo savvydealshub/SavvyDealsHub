@@ -2,26 +2,37 @@ import type { MetadataRoute } from 'next'
 import categories from '../data/categories.json'
 import { site } from '../lib/config'
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = site.url.replace(/\/$/, '')
+/**
+ * Sitemap policy:
+ * - Include only public, indexable pages.
+ * - Exclude admin/auth/profile/private URLs and API routes.
+ */
+export default function sitemap(): MetadataRoute.Sitemap {
+  const base = site.url.replace(/\/$/, '')
+  const now = new Date()
 
-  const routes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/`, lastModified: new Date() },
-    { url: `${baseUrl}/products`, lastModified: new Date() },
-    { url: `${baseUrl}/about`, lastModified: new Date() },
-    { url: `${baseUrl}/contact`, lastModified: new Date() },
-    { url: `${baseUrl}/help`, lastModified: new Date() },
-    { url: `${baseUrl}/privacy`, lastModified: new Date() },
-    { url: `${baseUrl}/terms`, lastModified: new Date() },
-    { url: `${baseUrl}/affiliate-disclosure`, lastModified: new Date() },
+  const staticPaths = [
+    '/',
+    '/compare',
+    '/c',
+    '/products',
+    '/how-pricing-works',
+    '/affiliate-disclosure',
+    '/privacy',
+    '/terms',
+    '/about',
+    '/contact',
+    '/help',
   ]
 
-  for (const cat of (categories as any[])) {
-    routes.push({
-      url: `${baseUrl}/c/${cat.slug}`,
-      lastModified: new Date(),
-    })
-  }
+  const categoryPaths = (categories as Array<{ slug: string }>).map((c) => `/c/${c.slug}`)
 
-  return routes
+  const urls = [...staticPaths, ...categoryPaths]
+
+  return urls.map((path) => ({
+    url: `${base}${path}`,
+    lastModified: now,
+    changeFrequency: path === '/' ? 'daily' : 'weekly',
+    priority: path === '/' ? 1 : path.startsWith('/compare') ? 0.9 : path.startsWith('/c') ? 0.8 : 0.6,
+  }))
 }

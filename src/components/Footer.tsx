@@ -22,6 +22,9 @@ export default function Footer() {
           >
             Cookie settings
           </button>
+          <a href="/how-pricing-works" className="underline underline-offset-2 hover:text-gray-900">
+            How pricing works
+          </a>
           <a
             href="/privacy"
             className="underline underline-offset-2 hover:text-gray-900"
@@ -39,6 +42,9 @@ export default function Footer() {
             className="underline underline-offset-2 hover:text-gray-900"
           >
             Affiliate disclosure
+          </a>
+          <a href="/contact" className="underline underline-offset-2 hover:text-gray-900">
+            Contact
           </a>
         </div>
       </div>

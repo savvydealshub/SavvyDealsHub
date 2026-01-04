@@ -16,8 +16,8 @@ export default function PrivacyPage() {
 
       <div className="space-y-4 text-sm leading-relaxed text-gray-700">
         <p>
-          We use <span className="font-medium">strictly necessary cookies</span> to keep the site secure
-          and functioning. These are always on and do not require consent.
+          We keep data collection minimal. We use <span className="font-medium">strictly necessary</span> cookies/storage
+          to keep the site secure and functioning, and optional cookies only if you consent.
         </p>
 
         <div className="rounded-2xl border border-slate-200 p-4 bg-white">
@@ -28,25 +28,37 @@ export default function PrivacyPage() {
               navigation, load balancing, remembering your cookie choice).
             </li>
             <li>
-              <span className="font-medium">Analytics</span> – helps us understand what’s popular and improve the
-              site (for example, aggregate visitor metrics).
+              <span className="font-medium">Preferences</span> – helps us remember settings you choose (for example your
+              Compare page preferences). This is stored in your browser and is not shared with third parties.
             </li>
             <li>
-              <span className="font-medium">Marketing</span> – used for advertising/affiliate measurement and ad
-              personalisation.
+              <span className="font-medium">Analytics</span> – helps us understand what’s popular and improve the site
+              (aggregate metrics).
+            </li>
+            <li>
+              <span className="font-medium">Marketing</span> – used for advertising and affiliate measurement when
+              enabled.
             </li>
           </ul>
         </div>
 
+        <h2 className="text-lg font-semibold">Local storage (Compare preferences)</h2>
         <p>
-          We only load non-essential scripts (analytics and advertising) <span className="font-medium">after you’ve
-          given consent</span> via the cookie banner. If you choose “Reject non-essential”, analytics/marketing
-          scripts won’t load.
+          If you tick “Remember my preferences” on the Compare page, we store your search settings (for example postcode
+          and membership toggles) in <span className="font-medium">localStorage</span> in your browser so you don’t have
+          to re-enter them next time. You can clear this at any time by disabling the checkbox, clearing site data in your
+          browser, or using private browsing.
         </p>
 
         <p>
-          Your choice is stored in your browser (localStorage and a small first‑party cookie) so we can remember it
-          on future visits. You can change or withdraw consent at any time using the{' '}
+          We only load non-essential scripts (analytics and advertising) <span className="font-medium">after you’ve
+          given consent</span> via the cookie banner. If you choose “Reject non-essential”, analytics/marketing scripts
+          won’t load.
+        </p>
+
+        <p>
+          Your cookie choice is stored in your browser (localStorage and/or a small first‑party cookie) so we can remember
+          it on future visits. You can change or withdraw consent at any time using the{' '}
           <span className="font-medium">Cookie settings</span> link in the footer.
         </p>
 
@@ -57,8 +69,7 @@ export default function PrivacyPage() {
         </p>
 
         <p>
-          If you have any questions about how we use cookies or your data, please contact us using the
-          details provided on the site.
+          If you have questions about privacy or your data, please contact us via the Contact page.
         </p>
       </div>
     </section>
