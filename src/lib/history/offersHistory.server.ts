@@ -1,6 +1,6 @@
-import { db } from '../db'
+import { db } from '@/lib/db'
 
-export type OfferSnapshotRow = {
+export type OfferHistoryPoint = {
   capturedAt: Date
   price: number | null
   shippingPrice: number | null
@@ -8,119 +8,173 @@ export type OfferSnapshotRow = {
   total: number | null
 }
 
-export function computeOfferTotal(price: number | null, shippingPrice: number | null, shippingIncluded: boolean): number | null {
-  if (price === null || !Number.isFinite(price)) return null
-  const ship = shippingIncluded ? 0 : (shippingPrice ?? 0)
-  const total = price + (Number.isFinite(ship) ? ship : 0)
-  return Math.round(total * 100) / 100
+/**
+ * Compute an "all-in" total price from an offer or snapshot-like object.
+ * If shippingIncluded is true, total == price.
+ * If shippingIncluded is false, total == price + shippingPrice (when present).
+ */
+export function computeOfferTotal(input: {
+  price: number | null
+  shippingPrice?: number | null
+  shippingIncluded?: boolean | null
+}): number | null {
+  const price = input.price
+  if (price == null || !Number.isFinite(price)) return null
+
+  const shippingIncluded = Boolean(input.shippingIncluded)
+  const shipping = input.shippingPrice
+  if (shippingIncluded) return price
+  if (shipping == null || !Number.isFinite(shipping)) return price
+  return price + shipping
 }
 
-export async function recordSnapshotsForOfferIds(offerIds: number[]) {
-  if (offerIds.length === 0) return { n: 0 }
-  const offers = await db.offer.findMany({
-    where: { id: { in: offerIds } },
-    select: { id: true, price: true, shippingPrice: true, shippingIncluded: true },
-  })
-  if (!offers.length) return { n: 0 }
-
-  await db.offerPriceSnapshot.createMany({
-    data: offers.map((o) => ({
-      offerId: o.id,
-      price: o.price,
-      shippingPrice: o.shippingPrice,
-      shippingIncluded: o.shippingIncluded,
-    })),
-  })
-
-  return { n: offers.length }
-}
-
-export async function recordSnapshotsForAllOffers(batchSize = 1000) {
-  let cursor: number | undefined
-  let total = 0
-  while (true) {
-    const offers = await db.offer.findMany({
-      take: batchSize,
-      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-      orderBy: { id: 'asc' },
-      select: { id: true, price: true, shippingPrice: true, shippingIncluded: true },
-    })
-    if (offers.length === 0) break
-    cursor = offers[offers.length - 1].id
-
-    await db.offerPriceSnapshot.createMany({
-      data: offers.map((o) => ({
-        offerId: o.id,
-        price: o.price,
-        shippingPrice: o.shippingPrice,
-        shippingIncluded: o.shippingIncluded,
-      })),
-    })
-    total += offers.length
-  }
-  return { n: total }
-}
-
-export async function getOfferHistory(offerId: number, limit = 60): Promise<OfferSnapshotRow[]> {
-  const snaps = await db.offerPriceSnapshot.findMany({
-    where: { offerId },
-    orderBy: { capturedAt: 'desc' },
-    take: limit,
-    select: { capturedAt: true, price: true, shippingPrice: true, shippingIncluded: true },
-  })
-  return snaps.map((s) => ({
-    ...s,
-    total: computeOfferTotal(s.price, s.shippingPrice, s.shippingIncluded),
-  }))
-}
-
-export async function getBiggestDropsByCategory(category: string, days = 7, take = 10) {
+export async function getOfferHistory(offerId: number, days = 30): Promise<OfferHistoryPoint[]> {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
-  // Find offers in category
-  const offers = await db.offer.findMany({
-    where: { category },
-    select: { id: true, title: true, retailer: true, url: true, imageUrl: true, price: true, shippingPrice: true, shippingIncluded: true },
-    take: 2000,
-  })
-  if (!offers.length) return []
-
-  // Load recent snapshots for these offers
-  const ids = offers.map((o) => o.id)
-  const snaps = await db.offerPriceSnapshot.findMany({
-    where: { offerId: { in: ids }, capturedAt: { gte: since } },
-    orderBy: { capturedAt: 'asc' },
-    select: { offerId: true, capturedAt: true, price: true, shippingPrice: true, shippingIncluded: true },
-  })
-
-  const byOffer = new Map<number, OfferSnapshotRow[]>()
-  for (const s of snaps) {
-    const row: OfferSnapshotRow = { ...s, total: computeOfferTotal(s.price, s.shippingPrice, s.shippingIncluded) }
-    const arr = byOffer.get(s.offerId) ?? []
-    arr.push(row)
-    byOffer.set(s.offerId, arr)
-  }
-
-  const results: any[] = []
-  for (const o of offers) {
-    const hist = byOffer.get(o.id)
-    if (!hist || hist.length < 2) continue
-    const first = hist[0].total
-    const last = hist[hist.length - 1].total
-    if (first === null || last === null) continue
-    const drop = Math.round((first - last) * 100) / 100
-    if (drop <= 0) continue
-    results.push({
-      offerId: o.id,
-      title: o.title,
-      retailer: o.retailer,
-      url: o.url,
-      imageUrl: o.imageUrl,
-      currentTotal: computeOfferTotal(o.price, o.shippingPrice, o.shippingIncluded),
-      drop,
+  // If the snapshots table is not present yet (no prisma push), just return empty.
+  try {
+    const rows = await db.offerPriceSnapshot.findMany({
+      where: { offerId, capturedAt: { gte: since } },
+      orderBy: { capturedAt: 'asc' },
+      select: {
+        capturedAt: true,
+        price: true,
+        shippingPrice: true,
+        shippingIncluded: true,
+      },
     })
-  }
 
-  results.sort((a, b) => b.drop - a.drop)
-  return results.slice(0, take)
+    return rows.map((r) => ({
+      capturedAt: r.capturedAt,
+      price: r.price,
+      shippingPrice: r.shippingPrice,
+      shippingIncluded: r.shippingIncluded,
+      total: computeOfferTotal(r),
+    }))
+  } catch {
+    return []
+  }
+}
+
+type BiggestDropRow = {
+  offerId: number
+  title: string
+  retailer: string
+  drop: number
+}
+
+/**
+ * Biggest drops site-wide across all offers (based on snapshots in the last N days).
+ */
+export async function getBiggestDrops(days = 14, limit = 10): Promise<BiggestDropRow[]> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+  try {
+    const snapshots = await db.offerPriceSnapshot.findMany({
+      where: { capturedAt: { gte: since } },
+      orderBy: { capturedAt: 'asc' },
+      select: {
+        offerId: true,
+        capturedAt: true,
+        price: true,
+        shippingPrice: true,
+        shippingIncluded: true,
+        offer: { select: { title: true, retailer: true } },
+      },
+      take: 50000,
+    })
+
+    const bestByOffer = new Map<number, { title: string; retailer: string; maxSoFar: number | null; bestDrop: number }>()
+
+    for (const s of snapshots) {
+      const total = computeOfferTotal(s)
+      if (total == null) continue
+
+      const existing = bestByOffer.get(s.offerId) ?? {
+        title: s.offer.title,
+        retailer: s.offer.retailer,
+        maxSoFar: null as number | null,
+        bestDrop: 0,
+      }
+
+      if (existing.maxSoFar == null || total > existing.maxSoFar) {
+        existing.maxSoFar = total
+      } else {
+        const drop = existing.maxSoFar - total
+        if (drop > existing.bestDrop) existing.bestDrop = drop
+      }
+
+      bestByOffer.set(s.offerId, existing)
+    }
+
+    return Array.from(bestByOffer.entries())
+      .map(([offerId, v]) => ({ offerId, title: v.title, retailer: v.retailer, drop: v.bestDrop }))
+      .filter((r) => r.drop > 0)
+      .sort((a, b) => b.drop - a.drop)
+      .slice(0, limit)
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Biggest drops within a specific category slug.
+ * Used on /c/[slug] pages.
+ */
+export async function getBiggestDropsByCategory(
+  category: string,
+  days = 7,
+  limit = 8
+): Promise<BiggestDropRow[]> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+  try {
+    const snapshots = await db.offerPriceSnapshot.findMany({
+      where: {
+        capturedAt: { gte: since },
+        offer: { category },
+      },
+      orderBy: { capturedAt: 'asc' },
+      select: {
+        offerId: true,
+        capturedAt: true,
+        price: true,
+        shippingPrice: true,
+        shippingIncluded: true,
+        offer: { select: { title: true, retailer: true } },
+      },
+      take: 50000,
+    })
+
+    const bestByOffer = new Map<number, { title: string; retailer: string; maxSoFar: number | null; bestDrop: number }>()
+
+    for (const s of snapshots) {
+      const total = computeOfferTotal(s)
+      if (total == null) continue
+
+      const existing = bestByOffer.get(s.offerId) ?? {
+        title: s.offer.title,
+        retailer: s.offer.retailer,
+        maxSoFar: null as number | null,
+        bestDrop: 0,
+      }
+
+      if (existing.maxSoFar == null || total > existing.maxSoFar) {
+        existing.maxSoFar = total
+      } else {
+        const drop = existing.maxSoFar - total
+        if (drop > existing.bestDrop) existing.bestDrop = drop
+      }
+
+      bestByOffer.set(s.offerId, existing)
+    }
+
+    return Array.from(bestByOffer.entries())
+      .map(([offerId, v]) => ({ offerId, title: v.title, retailer: v.retailer, drop: v.bestDrop }))
+      .filter((r) => r.drop > 0)
+      .sort((a, b) => b.drop - a.drop)
+      .slice(0, limit)
+  } catch {
+    return []
+  }
 }
