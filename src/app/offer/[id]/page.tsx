@@ -54,8 +54,17 @@ export default async function OfferHistoryPage({ params }: { params: Params }) {
     )
   }
 
-  const currentTotal = computeOfferTotal(offer.price, offer.shippingPrice, offer.shippingIncluded)
-  const history = await getOfferHistory(offer.id, 60)
+  // ✅ FIX: computeOfferTotal expects ONE object argument
+  const currentTotal = computeOfferTotal(offer)
+
+  // History points can be shaped slightly differently depending on server version:
+  // some versions return { capturedAt }, others { at }. We normalize to capturedAt.
+  const rawHistory = await getOfferHistory(offer.id, 60)
+  const history = (rawHistory as any[]).map((h) => ({
+    ...h,
+    capturedAt: h?.capturedAt ?? h?.at ?? h?.createdAt,
+  }))
+
   const newest = history[0]?.total ?? null
   const oldest = history[history.length - 1]?.total ?? null
   const change = oldest != null && newest != null ? Math.round((newest - oldest) * 100) / 100 : null
@@ -90,11 +99,15 @@ export default async function OfferHistoryPage({ params }: { params: Params }) {
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-sdh-surface-dark">
           <div className="text-xs text-slate-500 dark:text-slate-400">Current delivered total</div>
           <div className="mt-1 text-xl font-bold">{currentTotal == null ? '—' : `£${currentTotal.toFixed(2)}`}</div>
-          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Updated {new Date(offer.updatedAt).toLocaleDateString('en-GB')}</div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Updated {new Date(offer.updatedAt).toLocaleDateString('en-GB')}
+          </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-sdh-surface-dark">
           <div className="text-xs text-slate-500 dark:text-slate-400">Change (last {history.length} snapshots)</div>
-          <div className="mt-1 text-xl font-bold">{change == null ? '—' : `${change > 0 ? '+' : ''}£${change.toFixed(2)}`}</div>
+          <div className="mt-1 text-xl font-bold">
+            {change == null ? '—' : `${change > 0 ? '+' : ''}£${change.toFixed(2)}`}
+          </div>
           <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Older → newer totals</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-sdh-surface-dark">
@@ -121,14 +134,19 @@ export default async function OfferHistoryPage({ params }: { params: Params }) {
             </thead>
             <tbody>
               {history.map((h) => (
-                <tr key={h.capturedAt.toISOString()} className="border-t border-slate-100 dark:border-slate-800">
-                  <td className="p-3 text-slate-600 dark:text-slate-300">{h.capturedAt.toLocaleString('en-GB')}</td>
-                  <td className="p-3 tabular-nums">{h.price == null ? '—' : `£${h.price.toFixed(2)}`}</td>
+                <tr
+                  key={(h.capturedAt ? new Date(h.capturedAt).toISOString() : `${offer.id}-${Math.random()}`) as string}
+                  className="border-t border-slate-100 dark:border-slate-800"
+                >
+                  <td className="p-3 text-slate-600 dark:text-slate-300">
+                    {h.capturedAt ? new Date(h.capturedAt).toLocaleString('en-GB') : '—'}
+                  </td>
+                  <td className="p-3 tabular-nums">{h.price == null ? '—' : `£${Number(h.price).toFixed(2)}`}</td>
                   <td className="p-3 tabular-nums">
-                    {h.shippingIncluded ? '—' : h.shippingPrice == null ? '—' : `£${h.shippingPrice.toFixed(2)}`}
+                    {h.shippingIncluded ? '—' : h.shippingPrice == null ? '—' : `£${Number(h.shippingPrice).toFixed(2)}`}
                   </td>
                   <td className="p-3">{h.shippingIncluded ? 'Yes' : 'No'}</td>
-                  <td className="p-3 tabular-nums font-semibold">{h.total == null ? '—' : `£${h.total.toFixed(2)}`}</td>
+                  <td className="p-3 tabular-nums font-semibold">{h.total == null ? '—' : `£${Number(h.total).toFixed(2)}`}</td>
                 </tr>
               ))}
               {history.length === 0 ? (
