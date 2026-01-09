@@ -1,23 +1,22 @@
 import { NextResponse } from 'next/server'
-
 import { env } from '../../../../lib/config'
 import { recordSnapshotsForAllOffers } from '../../../../lib/history/offersHistory.server'
 
 export const dynamic = 'force-dynamic'
 
-function isAuthed(req: Request) {
-  const auth = req.headers.get('authorization') || ''
-  const token = auth.startsWith('Bearer ') ? auth.slice('Bearer '.length).trim() : ''
-  return Boolean(env.cron.secret) && token === env.cron.secret
-}
-
-// Creates a fresh snapshot for every Offer in the DB.
-// Schedule this daily (or hourly) via your host's cron.
 export async function GET(req: Request) {
-  if (!isAuthed(req)) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+  const { searchParams } = new URL(req.url)
+  const token = searchParams.get('token') ?? ''
+
+  // Your config typing has env.cron.secret (NOT env.INGEST_SECRET)
+  const secret = env?.cron?.secret ?? ''
+  if (!secret || token !== secret) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 })
   }
 
-  const res = await recordSnapshotsForAllOffers(1000)
-  return NextResponse.json({ ok: true, ...res })
+  // Must pass an object (not a number)
+  const res = await recordSnapshotsForAllOffers({ take: 1000 })
+
+  // Don't spread ok twice — return as-is
+  return NextResponse.json(res)
 }
