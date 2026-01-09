@@ -178,3 +178,36 @@ export async function getBiggestDropsByCategory(
     return []
   }
 }
+/**
+ * Records one price snapshot for every current offer.
+ * Used by the cron route /api/cron/offer-snapshots
+ * Fails safely (returns ok:false) instead of crashing builds/runtime.
+ */
+export async function recordSnapshotsForAllOffers(opts: { take?: number } = {}) {
+  const take = Math.min(Math.max(opts.take ?? 5000, 1), 20000)
+
+  try {
+    const offers = await db.offer.findMany({
+      take,
+      select: { id: true, price: true, shippingPrice: true, shippingIncluded: true },
+    })
+
+    if (!offers.length) {
+      return { ok: true, created: 0 }
+    }
+
+    await db.offerPriceSnapshot.createMany({
+      data: offers.map((o) => ({
+        offerId: o.id,
+        price: o.price,
+        shippingPrice: o.shippingPrice,
+        shippingIncluded: o.shippingIncluded,
+      })),
+    })
+
+    return { ok: true, created: offers.length }
+  } catch (e: any) {
+    return { ok: false, created: 0, error: e?.message ?? 'Snapshot recording failed' }
+  }
+}
+
