@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 
 import { db } from '../../../lib/db'
 import { parseCsv, rowsToObjects } from '../../../lib/csv'
+import { getDbState } from '../../../lib/dbState'
+
+// Prisma is Node-only. Being explicit avoids edge/runtime surprises on some hosts.
+export const runtime = 'nodejs'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,29 +164,32 @@ export default async function FeedsAdminPage({ searchParams }: { searchParams: S
   const err = (searchParams.err ?? '').toString().trim()
   const n = Number(searchParams.n ?? '0')
 
+  const dbState = await getDbState(['Offer', 'OfferPriceSnapshot', 'Category'])
   let count = 0
-  let dbReady = true
+  let dbReady = dbState.ready
   let byRetailer: Array<{ retailer: string; n: number }> = []
   let byCategory: Array<{ category: string; n: number }> = []
-  try {
-    count = await db.offer.count()
-    const byRetailerRaw = await db.offer.groupBy({
-      by: ['retailer'],
-      _count: { retailer: true },
-      orderBy: { _count: { retailer: 'desc' } },
-      take: 8,
-    })
-    byRetailer = byRetailerRaw.map((r) => ({ retailer: r.retailer, n: r._count.retailer }))
+  if (dbReady) {
+    try {
+      count = await db.offer.count()
+      const byRetailerRaw = await db.offer.groupBy({
+        by: ['retailer'],
+        _count: { retailer: true },
+        orderBy: { _count: { retailer: 'desc' } },
+        take: 8,
+      })
+      byRetailer = byRetailerRaw.map((r) => ({ retailer: r.retailer, n: r._count.retailer }))
 
-    const byCategoryRaw = await db.offer.groupBy({
-      by: ['category'],
-      _count: { category: true },
-      orderBy: { _count: { category: 'desc' } },
-      take: 8,
-    })
-    byCategory = byCategoryRaw.map((c) => ({ category: c.category, n: c._count.category }))
-  } catch {
-    dbReady = false
+      const byCategoryRaw = await db.offer.groupBy({
+        by: ['category'],
+        _count: { category: true },
+        orderBy: { _count: { category: 'desc' } },
+        take: 8,
+      })
+      byCategory = byCategoryRaw.map((c) => ({ category: c.category, n: c._count.category }))
+    } catch {
+      // If groupBy fails for any reason, keep the page usable.
+    }
   }
 
   return (
@@ -199,9 +206,15 @@ export default async function FeedsAdminPage({ searchParams }: { searchParams: S
 
       {!dbReady && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-          Database tables for offers are not ready yet.
+          Database connection is not ready for offers.
           <div className="mt-1">
             Run: <code className="px-1">npm run prisma:push</code> (or <code className="px-1">npx prisma migrate dev</code>)
+          </div>
+          {dbState.error ? <div className="mt-2 opacity-90">Details: {dbState.error}</div> : null}
+          <div className="mt-2 opacity-90">
+            Tables: {Object.entries(dbState.tables)
+              .map(([k, v]) => `${k}:${v ? 'ok' : 'missing'}`)
+              .join(' · ')}
           </div>
         </div>
       )}
