@@ -272,7 +272,7 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
                           : o.url
                       }
                       target="_blank"
-                      rel="noopener noreferrer sponsored"
+                      rel="noreferrer"
                       className={
                         'inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-medium shadow-sm transition ' +
                         (bestOfferId != null && o.offerId === bestOfferId

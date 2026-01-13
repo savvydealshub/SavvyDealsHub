@@ -176,7 +176,7 @@ export default async function AdminAnalyticsPage() {
                       <a
                         href={r.offerUrl}
                         target="_blank"
-                        rel="noopener noreferrer sponsored"
+                        rel="noreferrer"
                         className="underline"
                         title={`Offer #${r.offerId}`}
                       >

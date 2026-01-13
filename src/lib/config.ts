@@ -1,6 +1,21 @@
+function normalizeSiteUrl(input: string): string {
+  let url = (input || '').trim()
+
+  // Common copy/paste mistakes: wrapping URLs like [https://...] or including brackets.
+  url = url.replace(/[\[\]]/g, '')
+
+  // If someone provides "www.example.com" without a scheme, default to https.
+  if (url && !/^https?:\/\//i.test(url)) {
+    url = `https://${url}`
+  }
+
+  // Final fallback for local dev.
+  return url || 'http://localhost:8000'
+}
+
 export const site = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || 'SavvyDealsHub',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:8000',
+  url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || ''),
   adsenseClient: process.env.NEXT_PUBLIC_ADSENSE_CLIENT || '',
 }
 

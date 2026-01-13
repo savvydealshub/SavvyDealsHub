@@ -84,7 +84,7 @@ export default async function OfferHistoryPage({ params }: { params: Params }) {
           <a
             href={offer.url}
             target="_blank"
-            rel="noopener noreferrer sponsored"
+            rel="noreferrer"
             className="inline-flex items-center justify-center rounded-xl bg-sdh-primary px-4 py-2 font-semibold text-white hover:opacity-90"
           >
             View on retailer

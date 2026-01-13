@@ -1,84 +1,77 @@
-import './globals.css'
+import '../styles/globals.css'
 
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import Script from 'next/script'
-import { config } from '@/lib/config'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import CookieBanner from '@/components/CookieBanner'
-import ConsentScriptLoader from '@/components/ConsentScriptLoader'
+
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import CookieBanner from '../components/CookieBanner'
+import ConsentScriptLoader from '../components/ConsentScriptLoader'
+import { site } from '../lib/config'
+
+const title = site.name
+const description = `${site.name} — the smartest way to find great deals.`
 
 export const metadata: Metadata = {
-  title: 'Smart deals & true-price comparison | SavvyDealsHub',
-  description:
-    'Compare real delivered prices (including delivery and retailer memberships like Prime/Nectar/Clubcard) and find the smartest deals with SavvyDealsHub.',
+  // This generates: <meta name="google-adsense-account" content="ca-pub-..." />
+  other: {
+    'google-adsense-account': 'ca-pub-3051610197061559',
+  },
+  metadataBase: new URL(site.url),
+  title: {
+    default: title,
+    template: `%s | ${title}`,
+  },
+  description,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title,
+    description,
+    url: site.url,
+    siteName: title,
+    type: 'website',
+    locale: 'en_GB',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: `${site.name} — Smart deals`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title,
+    description,
+    images: ['/opengraph-image'],
+  },
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+  },
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
-      // Allow rich previews
-      'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
+      'max-video-preview': -1,
     },
   },
-  alternates: {
-    canonical: config.public.siteUrl,
-  },
-  openGraph: {
-    title: 'Smart deals & true-price comparison | SavvyDealsHub',
-    description: 'Compare real delivered prices and find the smartest deals with SavvyDealsHub.',
-    url: config.public.siteUrl,
-    siteName: 'SavvyDealsHub',
-    images: [
-      {
-        url: `${config.public.siteUrl}/opengraph-image`,
-        width: 1200,
-        height: 630,
-        alt: 'SavvyDealsHub — Smart deals',
-      },
-    ],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Smart deals & true-price comparison | SavvyDealsHub',
-    description: 'Compare real delivered prices and find the smartest deals with SavvyDealsHub.',
-    images: [`${config.public.siteUrl}/opengraph-image`],
-  },
-  icons: {
-    icon: '/logo.svg',
-    shortcut: '/logo.svg',
-  },
-  other: config.public.adsenseClient
-    ? {
-        'google-adsense-account': config.public.adsenseClient,
-      }
-    : undefined,
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        {/* Google AdSense */}
-        {config.public.adsenseClient ? (
-          <Script
-            id="adsense-js"
-            async
-            strategy="afterInteractive"
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.public.adsenseClient}`}
-            crossOrigin="anonymous"
-          />
-        ) : null}
-
-        {/* Consent + optional scripts */}
         <ConsentScriptLoader />
         <Navbar />
-        <main className="min-h-[70vh]">{children}</main>
+        <main className="container py-6">{children}</main>
         <Footer />
         <CookieBanner />
       </body>
