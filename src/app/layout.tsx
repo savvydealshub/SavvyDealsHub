@@ -1,22 +1,19 @@
-import '../styles/globals.css'
+import './globals.css'
 
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import Script from 'next/script'
 
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import CookieBanner from '../components/CookieBanner'
-import ConsentScriptLoader from '../components/ConsentScriptLoader'
-import { site } from '../lib/config'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import CookieBanner from '@/components/CookieBanner'
+import ConsentScriptLoader from '@/components/ConsentScriptLoader'
+import { site } from '@/lib/config'
 
 const title = site.name
 const description = `${site.name} — the smartest way to find great deals.`
 
 export const metadata: Metadata = {
-  // This generates: <meta name="google-adsense-account" content="ca-pub-..." />
-  other: {
-    'google-adsense-account': 'ca-pub-3051610197061559',
-  },
   metadataBase: new URL(site.url),
   title: {
     default: title,
@@ -52,6 +49,12 @@ export const metadata: Metadata = {
     icon: '/logo.svg',
     shortcut: '/logo.svg',
   },
+  other: site.adsenseClient
+    ? {
+        // This generates: <meta name="google-adsense-account" content="ca-pub-..." />
+        'google-adsense-account': site.adsenseClient,
+      }
+    : undefined,
   robots: {
     index: true,
     follow: true,
@@ -69,9 +72,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        {/* Google AdSense */}
+        {site.adsenseClient ? (
+          <Script
+            id="adsense-js"
+            async
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.adsenseClient}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
+
+        {/* Consent + optional scripts */}
         <ConsentScriptLoader />
+
         <Navbar />
-        <main className="container py-6">{children}</main>
+        <main className="container py-6 min-h-[70vh]">{children}</main>
         <Footer />
         <CookieBanner />
       </body>

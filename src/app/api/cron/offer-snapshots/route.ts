@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { env } from '../../../../lib/config'
-import { recordSnapshotsForAllOffers } from '../../../../lib/history/offersHistory.server'
+import { env } from '@/lib/config'
+import { recordSnapshotsForAllOffers } from '@/lib/history/offersHistory.server'
 
 export const dynamic = 'force-dynamic'
 
