@@ -7,7 +7,12 @@ frontend:
         - npx prisma generate
     build:
       commands:
-        - npx prisma migrate deploy
+        - |
+            if [ -n "$DATABASE_URL_UNPOOLED" ]; then
+              DATABASE_URL="$DATABASE_URL_UNPOOLED" npx prisma migrate deploy
+            else
+              npx prisma migrate deploy
+            fi
         - npm run build
   artifacts:
     baseDirectory: .next
