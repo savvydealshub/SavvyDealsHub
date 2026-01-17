@@ -21,6 +21,10 @@ export default function AffiliateDisclosurePage() {
           our site and make a purchase, we may receive a commission.
         </p>
 
+        <p className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800">
+          <span className="font-medium">Amazon disclosure:</span> As an Amazon Associate I earn from qualifying purchases.
+        </p>
+
         <p>
           Affiliate revenue helps cover hosting and development costs. It does not increase the price you pay.
         </p>

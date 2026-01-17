@@ -12,7 +12,8 @@ export default function Footer() {
     <footer className="border-t mt-10">
       <div className="container py-8 text-xs sm:text-sm text-gray-600 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
         <div>
-          © {year} SavvyDealsHub — Affiliate links may earn us a commission.
+          © {year} SavvyDealsHub — Affiliate links may earn us a commission.{' '}
+          <span className="whitespace-nowrap">As an Amazon Associate I earn from qualifying purchases.</span>
         </div>
         <div className="flex flex-wrap gap-3 items-center">
           <button
@@ -22,6 +23,9 @@ export default function Footer() {
           >
             Cookie settings
           </button>
+          <a href="/guides" className="underline underline-offset-2 hover:text-gray-900">
+            Guides
+          </a>
           <a href="/how-pricing-works" className="underline underline-offset-2 hover:text-gray-900">
             How pricing works
           </a>
