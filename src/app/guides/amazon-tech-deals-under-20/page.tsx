@@ -12,6 +12,10 @@ function amz(asin: string) {
 export default function Page() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
+      <a href="/guides" className="mb-4 block text-sm underline opacity-80">
+        ← Back to all guides
+      </a>
+
       <h1 className="text-3xl font-bold">Top Amazon Tech Deals Under £20</h1>
 
       <p className="mt-3 text-base opacity-80">
@@ -20,42 +24,46 @@ export default function Page() {
         These are practical gadgets people actually buy and use every day.
       </p>
 
+      <p className="mt-2 text-base opacity-80">
+        We focus on items with practical everyday use and solid reviews — no hype.
+      </p>
+
       <h2 className="mt-8 text-xl font-semibold">🔗 Deals &amp; Useful Finds</h2>
 
       <ul className="mt-4 list-disc space-y-3 pl-6">
         <li>
           <strong>USB-C Fast Wall Charger (20W)</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">
+          <a className="underline" href={amz("B0CJ2B7TS1")} target="_blank" rel="nofollow sponsored noopener">
             View on Amazon
           </a>
         </li>
         <li>
           <strong>Wireless Mouse (USB / Bluetooth)</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">
+          <a className="underline" href={amz("B00552K0GM")} target="_blank" rel="nofollow sponsored noopener">
             View on Amazon
           </a>
         </li>
         <li>
           <strong>Bluetooth Earbuds (Budget Range)</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">
+          <a className="underline" href={amz("B09BVDNPGB")} target="_blank" rel="nofollow sponsored noopener">
             View on Amazon
           </a>
         </li>
         <li>
           <strong>Adjustable Phone Stand for Desk</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">
+          <a className="underline" href={amz("B07BK5P5ST")} target="_blank" rel="nofollow sponsored noopener">
             View on Amazon
           </a>
         </li>
         <li>
           <strong>USB LED Light Strip (TV / Desk Use)</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">
+          <a className="underline" href={amz("B07SH48YTR")} target="_blank" rel="nofollow sponsored noopener">
             View on Amazon
           </a>
         </li>
         <li>
           <strong>USB Hub (4-Port Expansion)</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">
+          <a className="underline" href={amz("B0CD1BHXPZ")} target="_blank" rel="nofollow sponsored noopener">
             View on Amazon
           </a>
         </li>

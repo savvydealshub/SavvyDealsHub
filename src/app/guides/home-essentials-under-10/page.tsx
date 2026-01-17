@@ -9,6 +9,10 @@ const amz = (asin: string) => `https://www.amazon.co.uk/dp/${asin}?tag=${TAG}`;
 export default function Page() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
+      <a href="/guides" className="mb-4 block text-sm underline opacity-80">
+        ← Back to all guides
+      </a>
+
       <h1 className="text-3xl font-bold">Top Home Essentials Under £10</h1>
 
       <p className="mt-3 text-base opacity-80">
@@ -17,26 +21,30 @@ export default function Page() {
         This list focuses on simple home essentials that are commonly purchased on Amazon.
       </p>
 
+      <p className="mt-2 text-base opacity-80">
+        We focus on items with practical everyday use and solid reviews — no hype.
+      </p>
+
       <h2 className="mt-8 text-xl font-semibold">🔗 Deals &amp; Useful Finds</h2>
 
       <ul className="mt-4 list-disc space-y-3 pl-6">
         <li><strong>Microfibre Cleaning Cloths (Multi-Pack)</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+          <a className="underline" href={amz("B009FUF6DM")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
         </li>
         <li><strong>Motion Sensor Night Light</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+          <a className="underline" href={amz("B09LVKGH6V")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
         </li>
         <li><strong>Drawer Organiser Trays</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+          <a className="underline" href={amz("B08HH7RFYD")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
         </li>
         <li><strong>Door Draught Excluder</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+          <a className="underline" href={amz("B08QG213MJ")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
         </li>
         <li><strong>Non-Slip Clothes Hangers</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+          <a className="underline" href={amz("B00FXNABPI")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
         </li>
         <li><strong>Reusable Storage Bags</strong>{" "}
-          <a className="underline" href={amz("B0XXXXXXX")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+          <a className="underline" href={amz("B08L7V81HD")} target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
         </li>
       </ul>
 
