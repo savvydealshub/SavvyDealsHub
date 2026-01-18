@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { db } from '../../../lib/db'
 import { parseCsv, rowsToObjects } from '../../../lib/csv'
 import { getDbState } from '../../../lib/dbState'
+import { computeShippingSanity } from '../../../lib/deals/shippingSanity'
 
 // Prisma is Node-only. Being explicit avoids edge/runtime surprises on some hosts.
 export const runtime = 'nodejs'
@@ -19,6 +20,8 @@ type SearchParams = {
   ok?: string
   err?: string
   n?: string
+  u?: string
+  h?: string
 }
 
 function boolFrom(v: string | undefined): boolean {
@@ -49,6 +52,27 @@ function normalizeCondition(v: string | undefined): 'New' | 'Used' | 'Refurbishe
   if (s.includes('used') || s.includes('pre')) return 'Used'
   if (s.includes('new')) return 'New'
   return 'Unknown'
+}
+
+// Block only explicit adult-toy terms (site is not age-gated yet).
+// Keep the list conservative to avoid false positives.
+const EXPLICIT_BLOCKLIST = [
+  /\bdildo\b/i,
+  /\bvibrator\b/i,
+  /\bflesh\s*light\b/i,
+  /\bfleshlight\b/i,
+  /\bbutt\s*plug\b/i,
+  /\banal\s*plug\b/i,
+  /\bsex\s*toy\b/i,
+  /\badult\s*toy\b/i,
+  /\bpenis\b/i,
+  /\bvagina\b/i,
+]
+
+function hasExplicitAdultToyTerms(title: string, description: string): boolean {
+  const text = `${title} ${description}`.trim()
+  if (!text) return false
+  return EXPLICIT_BLOCKLIST.some((re) => re.test(text))
 }
 
 async function uploadAction(formData: FormData) {
@@ -82,12 +106,19 @@ async function uploadAction(formData: FormData) {
     }
 
     const membershipType = normalizeMembershipType(get(o, 'membershipType'))
-    const membershipRequired = boolFrom(get(o, 'membershipRequired')) || Boolean(membershipType)
+    // IMPORTANT: membershipType does NOT imply membership is required.
+    // Prime/Nectar/Clubcard can be a benefit that affects delivery or discount, not a hard requirement.
+    const membershipRequired = boolFrom(get(o, 'membershipRequired'))
+
+    const description = (get(o, 'description') || '').trim()
+    if (hasExplicitAdultToyTerms(title, description)) {
+      return { error: `Blocked explicit adult-toy content for sku="${sku}" title="${title}"` }
+    }
 
     return {
       sku,
       title,
-      description: (get(o, 'description') || '').trim() || null,
+      description: description || null,
       category,
       retailer,
       url,
@@ -110,6 +141,20 @@ async function uploadAction(formData: FormData) {
   }
 
   const good = parsed as any[]
+
+  // Delivery sanity warnings (we still import, but these rows will not show on strict "Deals" paths by default).
+  let warnUnknownDelivery = 0
+  let warnHighDelivery = 0
+  for (const r of good) {
+    const s = computeShippingSanity({
+      price: r.price,
+      shippingPrice: r.shippingPrice,
+      shippingIncluded: r.shippingIncluded,
+    })
+    if (s.itemPrice == null) continue
+    if (s.shippingUnknown) warnUnknownDelivery++
+    if (s.highDelivery) warnHighDelivery++
+  }
 
   // Upsert-like behaviour via createMany + skipDuplicates (unique constraint: sku+retailer+url)
   try {
@@ -145,7 +190,7 @@ async function uploadAction(formData: FormData) {
     )
   }
 
-  redirect(`/admin/feeds?ok=1&n=${good.length}`)
+  redirect(`/admin/feeds?ok=1&n=${good.length}&u=${warnUnknownDelivery}&h=${warnHighDelivery}`)
 }
 
 async function clearAllOffersAction() {
@@ -163,6 +208,8 @@ export default async function FeedsAdminPage({ searchParams }: { searchParams: S
   const ok = searchParams.ok === '1'
   const err = (searchParams.err ?? '').toString().trim()
   const n = Number(searchParams.n ?? '0')
+  const u = Number(searchParams.u ?? '0')
+  const h = Number(searchParams.h ?? '0')
 
   const dbState = await getDbState(['Offer', 'OfferPriceSnapshot', 'Category'])
   let count = 0
@@ -225,6 +272,11 @@ export default async function FeedsAdminPage({ searchParams }: { searchParams: S
           <div className="mt-1 text-emerald-800 dark:text-emerald-200/90">
             Duplicates are skipped automatically.
           </div>
+          {(u > 0 || h > 0) ? (
+            <div className="mt-2 text-xs text-emerald-800 dark:text-emerald-200/90">
+              Delivery sanity note: {u > 0 ? <><b>{u}</b> row{u === 1 ? '' : 's'} had unknown delivery</> : null}{u > 0 && h > 0 ? ' · ' : null}{h > 0 ? <><b>{h}</b> row{h === 1 ? '' : 's'} had unusually high delivery</> : null}. These won't appear on strict "Top Deals" / "Home" paths by default.
+            </div>
+          ) : null}
         </div>
       )}
 

@@ -3,8 +3,10 @@ import Link from 'next/link'
 import CategoryGrid from '../../../components/CategoryGrid'
 import { site } from '../../../lib/config'
 import { getUiProducts } from '../../../lib/products.server'
+import { getOfferCount, getUiOffersFromDb } from '../../../lib/offers.server'
 import { categories, childrenOf } from '../../../lib/categories'
 import { getBiggestDropsByCategory } from '../../../lib/history/offersHistory.server'
+import { computeShippingSanity, getDealShippingCap, partitionByDelivery } from '../../../lib/deals/shippingSanity'
 
 function humanizeSlug(slug: string) {
   return slug
@@ -73,14 +75,65 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const cat = await getCategory(params.slug)
   const categoryName = cat?.name ?? humanizeSlug(params.slug)
 
-  const all = await getUiProducts()
-  const items = all.filter((p: any) => (p.category ?? '').toLowerCase() === categoryName.toLowerCase()).slice(0, 24)
+  // Prefer DB offers when available (uploaded CSV / authorised feeds), otherwise fall back to seed JSON / remote feeds.
+  let all: any[] = []
+  let usingDb = false
+  try {
+    const count = await getOfferCount()
+    if (count > 0) {
+      all = await getUiOffersFromDb({ limit: 2000 })
+      usingDb = true
+    }
+  } catch {
+    all = []
+  }
+  if (all.length === 0) {
+    all = await getUiProducts({ limit: 2000 })
+  }
+
+  // Robust matching: some older feeds used category NAME instead of slug.
+  const normSlug = params.slug.toLowerCase()
+  const normName = categoryName.toLowerCase()
+  const rawItems = all.filter((p: any) => {
+    const c = String(p.category ?? '').toLowerCase().trim()
+    return c === normSlug || c === normName
+  })
+
+  // Shipping sanity:
+  // - Always hide extortionate delivery items.
+  // - For Top Deals + Home paths, also default to hiding unknown-delivery items.
+  const isHomePath = params.slug === 'home' || cat?.parent === 'home'
+  const isTopDeals = params.slug === 'deals'
+  const strictDelivery = isTopDeals || isHomePath
+
+  const { eligible, highDelivery, unknownDelivery } = partitionByDelivery(rawItems as any)
+  const strictEligible = eligible.filter((p: any) => {
+    const s = computeShippingSanity({
+      price: p.price,
+      shippingPrice: p.shippingPrice,
+      shippingIncluded: p.shippingIncluded,
+      category: p.category,
+    })
+    if (s.itemPrice == null) return true
+    if (s.shippingUnknown) return false
+    const cap = getDealShippingCap(p.category)
+    return (s.shippingPrice ?? 0) <= cap
+  })
+  const saneItems = strictDelivery ? strictEligible : [...eligible, ...unknownDelivery]
+
+  // If strict filtering leaves the page empty, fall back to showing unknown-delivery items too (but still exclude high delivery).
+  const items = (saneItems.length ? saneItems : [...eligible, ...unknownDelivery]).slice(0, 24)
+  const hiddenHigh = highDelivery.length
+  const hiddenUnknown = strictDelivery ? unknownDelivery.length : 0
 
   const subcats = childrenOf(params.slug)
   const subcatsWithCounts = subcats
     .map((s) => {
       const name = s.name ?? humanizeSlug(s.slug)
-      const count = all.filter((p: any) => (p.category ?? '').toLowerCase() === name.toLowerCase()).length
+      const count = all.filter((p: any) => {
+        const c = String(p.category ?? '').toLowerCase().trim()
+        return c === s.slug.toLowerCase() || c === name.toLowerCase()
+      }).length
       return { ...s, count }
     })
     .sort((a, b) => b.count - a.count)
@@ -150,7 +203,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            href={`/compare?q=${encodeURIComponent(categoryName)}`}
+            href={`/compare?q=${encodeURIComponent(categoryName)}${strictDelivery ? '&lowDelivery=1' : ''}`}
             className="inline-flex items-center justify-center rounded-full bg-sdh-accent px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95"
           >
             Compare {categoryName} (True Price)
@@ -163,6 +216,20 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </Link>
         </div>
       </header>
+
+      {(hiddenHigh > 0 || hiddenUnknown > 0) ? (
+        <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 text-xs text-slate-600 shadow-sm dark:border-slate-800 dark:bg-sdh-surface-dark/50 dark:text-slate-300">
+          <div className="font-semibold text-slate-900 dark:text-slate-100">Delivery sanity is ON</div>
+          <div className="mt-1">
+            {hiddenHigh > 0 ? <>Hidden <b>{hiddenHigh}</b> offer{hiddenHigh === 1 ? '' : 's'} with unusually high delivery.</> : null}
+            {hiddenHigh > 0 && hiddenUnknown > 0 ? ' ' : null}
+            {hiddenUnknown > 0 ? <>Also hiding <b>{hiddenUnknown}</b> offer{hiddenUnknown === 1 ? '' : 's'} with unknown delivery on this path.</> : null}
+          </div>
+          <div className="mt-1">
+            Use <Link className="underline" href={`/compare?q=${encodeURIComponent(categoryName)}`}>Compare</Link> to see all offers and delivery estimates.
+          </div>
+        </div>
+      ) : null}
 
 
       <section className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-800 dark:bg-sdh-surface-dark/70">

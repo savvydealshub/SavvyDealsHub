@@ -30,6 +30,7 @@ export type CompareOffer = {
   condition: Condition
   /** Retailer membership needed to access best offer/delivery (Prime/Nectar/Clubcard etc.) */
   membershipRequired: boolean
+  membershipType?: RetailerMembership
   membershipLabel?: string
   totalPrice: number | null
   /** True if delivery is an estimate (until retailer APIs/feeds are connected). */
@@ -78,12 +79,12 @@ function uiProductToDomainOffer(p: UiProduct, ctx: UserContext): Offer {
   const retailer = inferRetailerFromUrl(p.url)
   const itemPrice = Number.isFinite(p.price as any) ? round2(Number(p.price)) : undefined
 
-  const condition = inferCondition(p.title ?? '')
+  const condition: Condition = (p as any)?.condition ?? inferCondition(p.title ?? '')
 
   // Membership logic:
   // Column means: retailer membership (Prime/Nectar/Clubcard) may be needed to access best advertised price/delivery.
-  const membershipType = retailer.membershipType
-  const membershipRequired = Boolean(membershipType)
+  const membershipType = (p as any)?.membershipType ?? retailer.membershipType
+  const membershipRequired = (p as any)?.membershipRequired != null ? Boolean((p as any)?.membershipRequired) : Boolean(membershipType)
 
   // Delivery:
   let deliveryCost: number | undefined
@@ -145,6 +146,7 @@ function domainOfferToRow(p: UiProduct, o: Offer): CompareOffer {
     postagePrice: o.deliveryPrice?.amount ?? null,
     condition: o.condition,
     membershipRequired: o.membershipRequired,
+    membershipType: o.membershipType,
     membershipLabel: o.membershipType ? membershipLabelFor(o.membershipType) : undefined,
     totalPrice: o.totalPrice?.amount ?? null,
     deliveryIsEstimate: o.deliveryIsEstimate,

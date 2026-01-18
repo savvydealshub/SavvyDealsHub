@@ -29,8 +29,11 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
   const [hideMembership, setHideMembership] = useState(false)
   const [hideUsed, setHideUsed] = useState(false)
   const [freeDeliveryOnly, setFreeDeliveryOnly] = useState(false)
+  const [maxPostage, setMaxPostage] = useState<number | null>(null)
   const [maxTotal, setMaxTotal] = useState<number | null>(null)
   const [retailer, setRetailer] = useState<string>('all')
+  const [onlyMyMemberships, setOnlyMyMemberships] = useState(false)
+  const [primeOnly, setPrimeOnly] = useState(false)
 
   const searchParams = useSearchParams()
   useEffect(() => {
@@ -39,15 +42,31 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
     const newOnly = searchParams.get('newOnly')
     const freeDelivery = searchParams.get('freeDelivery')
     const max = searchParams.get('max')
+    const maxP = searchParams.get('maxPostage')
+    const lowDelivery = searchParams.get('lowDelivery')
     const r = searchParams.get('retailer')
+    const prime = searchParams.get('prime')
+    const nectar = searchParams.get('nectar')
+    const clubcard = searchParams.get('clubcard')
     if (noMembership === '1') setHideMembership(true)
     if (newOnly === '1') setHideUsed(true)
     if (freeDelivery === '1') setFreeDeliveryOnly(true)
+    if (maxP) {
+      const n = Number(maxP)
+      if (Number.isFinite(n) && n >= 0) setMaxPostage(n)
+    }
+    // Convenience shortcut used by the homepage + strict category paths.
+    if (lowDelivery === '1' && !maxP) setMaxPostage(4.99)
     if (r) setRetailer(r)
     if (max) {
       const n = Number(max)
       if (Number.isFinite(n) && n > 0) setMaxTotal(n)
     }
+
+    // If the user has declared any memberships (Prime/Nectar/Clubcard), default to showing
+    // offers that match those memberships. This keeps results "deal-relevant".
+    const anyMembership = prime === '1' || nectar === '1' || clubcard === '1'
+    if (anyMembership) setOnlyMyMemberships(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -59,15 +78,32 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
   }, [offers])
 
   const filtered = useMemo(() => {
+    const hasPrime = searchParams.get('prime') === '1'
+    const hasNectar = searchParams.get('nectar') === '1'
+    const hasClubcard = searchParams.get('clubcard') === '1'
+
     return offers.filter((o) => {
       if (hideMembership && o.membershipRequired) return false
       if (hideUsed && (o.condition === 'Used' || o.condition === 'Refurbished')) return false
       if (freeDeliveryOnly && (o.postagePrice == null || o.postagePrice > 0)) return false
+      if (maxPostage != null && (o.postagePrice == null || o.postagePrice > maxPostage)) return false
       if (maxTotal != null && (o.totalPrice == null || o.totalPrice > maxTotal)) return false
       if (retailer !== 'all' && o.retailer !== retailer) return false
+
+      // Membership-aware filtering:
+      // - If enabled, hide offers that require a membership the user did not tick.
+      // - If membership type is unknown, keep the offer (we can't safely decide).
+      if (onlyMyMemberships && o.membershipRequired && o.membershipType) {
+        if (o.membershipType === 'AMAZON_PRIME' && !hasPrime) return false
+        if (o.membershipType === 'NECTAR' && !hasNectar) return false
+        if (o.membershipType === 'CLUBCARD' && !hasClubcard) return false
+      }
+
+      // Optional: strict Amazon Prime-only view.
+      if (primeOnly && o.membershipType !== 'AMAZON_PRIME') return false
       return true
     })
-  }, [offers, hideMembership, hideUsed, freeDeliveryOnly, maxTotal, retailer])
+  }, [offers, hideMembership, hideUsed, freeDeliveryOnly, maxPostage, maxTotal, retailer, onlyMyMemberships, primeOnly, searchParams])
 
   const sorted = useMemo(() => {
     const list = filtered.slice()
@@ -159,21 +195,36 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
 
         <div className="flex flex-wrap gap-4 text-sm">
           <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={hideMembership}
-              onChange={(e) => setHideMembership(e.target.checked)}
-            />
-            Hide membership-required
-          </label>
-          <label className="flex items-center gap-2">
             <input type="checkbox" checked={hideUsed} onChange={(e) => setHideUsed(e.target.checked)} />
             New only
           </label>
+
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={hideMembership} onChange={(e) => setHideMembership(e.target.checked)} />
+            Hide membership-required
+          </label>
+
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={freeDeliveryOnly} onChange={(e) => setFreeDeliveryOnly(e.target.checked)} />
             Free delivery only
           </label>
+
+          <label className="flex items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">Max delivery</span>
+            <input
+              inputMode="numeric"
+              placeholder="e.g. 4.99"
+              value={maxPostage == null ? '' : String(maxPostage)}
+              onChange={(e) => {
+                const v = e.target.value.trim()
+                if (!v) return setMaxPostage(null)
+                const n = Number(v)
+                setMaxPostage(Number.isFinite(n) && n >= 0 ? n : null)
+              }}
+              className="h-9 w-24 rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-sdh-primary/60 dark:border-slate-700 dark:bg-sdh-bg-dark"
+            />
+          </label>
+
           <label className="flex items-center gap-2">
             <span className="text-slate-600 dark:text-slate-300">Max total</span>
             <input
@@ -189,6 +240,28 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
               className="h-9 w-24 rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-sdh-primary/60 dark:border-slate-700 dark:bg-sdh-bg-dark"
             />
           </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={onlyMyMemberships}
+              onChange={(e) => setOnlyMyMemberships(e.target.checked)}
+              disabled={
+                searchParams.get('prime') !== '1' &&
+                searchParams.get('nectar') !== '1' &&
+                searchParams.get('clubcard') !== '1'
+              }
+              title="Tick Prime/Nectar/Clubcard above to enable this"
+            />
+            Match my memberships
+          </label>
+
+          {searchParams.get('prime') === '1' ? (
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={primeOnly} onChange={(e) => setPrimeOnly(e.target.checked)} />
+              Prime offers only
+            </label>
+          ) : null}
         </div>
       </div>
 

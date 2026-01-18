@@ -3,6 +3,8 @@ import ProductCard from '../../components/ProductCard'
 import categories from '../../data/categories.json'
 import { site } from '../../lib/config'
 import { getUiProducts } from '../../lib/products.server'
+import { getOfferCount, getUiOffersFromDb } from '../../lib/offers.server'
+import { partitionByDelivery } from '../../lib/deals/shippingSanity'
 
 export const metadata: Metadata = {
   title: 'Products',
@@ -22,11 +24,23 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const q = (searchParams.q ?? '').trim().toLowerCase()
   const categorySlug = (searchParams.category ?? '').trim().toLowerCase()
 
-  const filtered = await getUiProducts({
-    q: q || undefined,
-    categorySlug: categorySlug || undefined,
-    limit: 60,
-  })
+  // Prefer DB offers when available (uploaded CSV / authorised feeds).
+  let products: any[] = []
+  try {
+    const count = await getOfferCount()
+    if (count > 0) {
+      products = await getUiOffersFromDb({ q, categorySlug, limit: 400 })
+    }
+  } catch {
+    products = []
+  }
+  if (products.length === 0) {
+    products = await getUiProducts({ q: q || undefined, categorySlug: categorySlug || undefined, limit: 400 })
+  }
+
+  // Hide extreme delivery costs by default (still viewable in Compare).
+  const { eligible, unknownDelivery } = partitionByDelivery(products as any)
+  const filtered = [...eligible, ...unknownDelivery].slice(0, 60)
 
   const categoryOptions = (categories as any[])
     .filter((c) => !c.parent)

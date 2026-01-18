@@ -10,6 +10,11 @@ type Props = {
   initialPrime?: boolean
   initialNectar?: boolean
   initialClubcard?: boolean
+  /**
+   * When true, adds lowDelivery=1 to the compare URL.
+   * Use this on the homepage and strict deal paths so users default to "to-your-door" deals.
+   */
+  defaultLowDelivery?: boolean
 }
 
 type Prefs = {
@@ -52,6 +57,7 @@ export default function CompareSearchForm({
   initialPrime = false,
   initialNectar = false,
   initialClubcard = false,
+  defaultLowDelivery = false,
 }: Props) {
   const router = useRouter()
 
@@ -94,9 +100,10 @@ export default function CompareSearchForm({
     if (prefs.prime) params.set('prime', '1')
     if (prefs.nectar) params.set('nectar', '1')
     if (prefs.clubcard) params.set('clubcard', '1')
+    if (defaultLowDelivery) params.set('lowDelivery', '1')
     const qs = params.toString()
     return qs ? `?${qs}` : ''
-  }, [prefs])
+  }, [prefs, defaultLowDelivery])
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()

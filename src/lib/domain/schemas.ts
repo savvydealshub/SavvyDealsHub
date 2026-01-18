@@ -12,6 +12,11 @@ export const FeedItemSchema = z.object({
   category: z.string().min(1),
   shippingPrice: z.number().finite().optional(),
   shippingIncluded: z.boolean().optional(),
+  // Optional: allow feeds to declare condition + membership context.
+  // These are also supported in the CSV uploader.
+  condition: z.enum(['New', 'Used', 'Refurbished', 'Unknown']).optional(),
+  membershipRequired: z.boolean().optional(),
+  membershipType: z.enum(['AMAZON_PRIME', 'NECTAR', 'CLUBCARD']).optional(),
   isSponsored: z.boolean().optional(),
   sponsorLabel: z.string().optional(),
   source: z.string().optional(),

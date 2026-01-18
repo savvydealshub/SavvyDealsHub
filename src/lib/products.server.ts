@@ -18,6 +18,11 @@ export type UiProduct = {
   // Optional: for member pricing
   shippingPrice?: number
   shippingIncluded?: boolean
+  // Optional: for membership / loyalty pricing (Prime/Nectar/Clubcard)
+  membershipRequired?: boolean
+  membershipType?: 'AMAZON_PRIME' | 'NECTAR' | 'CLUBCARD'
+  // Optional: explicit condition (otherwise inferred from title)
+  condition?: 'New' | 'Used' | 'Refurbished' | 'Unknown'
   /** Sponsored placement (OFF by default; always labelled if enabled). */
   isSponsored?: boolean
   sponsorLabel?: string
