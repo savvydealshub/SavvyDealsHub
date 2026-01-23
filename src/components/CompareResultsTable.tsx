@@ -339,13 +339,13 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
                     <a
                       href={
                         o.offerId
-                          ? `/out?offerId=${encodeURIComponent(String(o.offerId))}&src=compare&cta=${encodeURIComponent(
+                          ? `/out?offerId=${encodeURIComponent(String(o.offerId))}&u=${encodeURIComponent(o.url)}&src=compare&cta=${encodeURIComponent(
                               bestOfferId != null && o.offerId === bestOfferId ? 'best' : 'row'
                             )}`
                           : o.url
                       }
                       target="_blank"
-                      rel="noopener noreferrer sponsored"
+                      rel="noopener noreferrer nofollow sponsored"
                       className={
                         'inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-medium shadow-sm transition ' +
                         (bestOfferId != null && o.offerId === bestOfferId
