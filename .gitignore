@@ -23,3 +23,13 @@ pnpm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Local CSV working files
+offers*.csv
+offer-rules.json
+
+# Patch artifacts
+mnt/
+
+# Local zips
+*.zip

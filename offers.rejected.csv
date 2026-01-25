@@ -1,4 +1,0 @@
-sku,title,description,category,retailer,url,imageUrl,price,shippingPrice,shippingIncluded,condition,membershipRequired,membershipType,isSponsored,sponsorLabel,reasons
-SKU-EXAMPLE-001,Example Product Title,Short description,electronics,Amazon,https://example.com/product,https://example.com/image.jpg,49.99,3.99,No,New,Yes,Prime,No,,url not UK-like (rule)
-SKU-EXAMPLE-002,Example Used Item,Used but in good condition,tools,eBay,https://example.com/ebay-listing,https://example.com/image2.jpg,39.99,0.00,Yes,Used,No,,No,,url not UK-like (rule)
-SKU-EXAMPLE-003,Example Clubcard Offer,Clubcard price applies,grocery,Tesco,https://example.com/tesco-product,https://example.com/image3.jpg,3.50,0.00,Yes,New,Yes,Clubcard,No,,url not UK-like (rule)
