@@ -6,6 +6,7 @@ import { getUiProducts } from '../../lib/products.server'
 import { getOfferCount, getUiOffersFromDb } from '../../lib/offers.server'
 import { buildOffersFromProducts } from '../../lib/compare.server'
 import { getClickTotals } from '../../lib/analytics/clicks.server'
+import { categories } from '../../lib/categories'
 
 export const metadata: Metadata = {
   title: 'Compare true prices',
@@ -24,8 +25,33 @@ type Props = {
   }
 }
 
+function normalize(s: string) {
+  return (s ?? '').toLowerCase().trim()
+}
+
+function guessCategorySlug(qLower: string): string | null {
+  const q = normalize(qLower)
+  if (!q) return 'deals'
+
+  // Common “generic compare” queries should map to your Deals surface.
+  if (['topdeals', 'top deals', 'deals', 'offers', 'top offer', 'top offers', 'trending', 'best deals'].includes(q)) {
+    return 'deals'
+  }
+
+  // Exact slug match
+  const bySlug = categories.find((c) => normalize(c.slug) === q)
+  if (bySlug) return bySlug.slug
+
+  // Name match (e.g., "beauty" or "home")
+  const byName = categories.find((c) => normalize(c.name) === q)
+  if (byName) return byName.slug
+
+  return null
+}
+
 export default async function ComparePage({ searchParams }: Props) {
   const q = (searchParams.q ?? '').trim()
+  const qLower = normalize(q)
   const postcode = (searchParams.postcode ?? '').trim()
   const membership = {
     amazonPrime: searchParams.prime === '1',
@@ -34,18 +60,42 @@ export default async function ComparePage({ searchParams }: Props) {
   }
 
   // Prefer DB offers when available (populated via CSV uploader / authorised feeds).
-  // Falls back to the JSON seed list so the page always works out of the box.
+  // IMPORTANT: Never fall back to the sample list if the DB contains offers — instead show latest offers.
   let products = [] as Awaited<ReturnType<typeof getUiProducts>>
+  let usedDb = false
+  let note = ''
+
   try {
     const count = await getOfferCount()
     if (count > 0) {
-      products = await getUiOffersFromDb({ q: q.toLowerCase(), limit: 800 })
+      usedDb = true
+
+      const categorySlug = guessCategorySlug(qLower)
+
+      if (categorySlug) {
+        products = await getUiOffersFromDb({ categorySlug, limit: 800 })
+        if (q && categorySlug !== qLower) {
+          note = `Showing ${categorySlug} offers for “${q}”.`
+        }
+      } else if (qLower) {
+        products = await getUiOffersFromDb({ q: qLower, limit: 800 })
+      } else {
+        products = await getUiOffersFromDb({ limit: 800 })
+      }
+
+      // If nothing matches, show latest offers (still from DB).
+      if (products.length === 0) {
+        products = await getUiOffersFromDb({ limit: 800 })
+        if (qLower) note = `No exact matches for “${q}”. Showing latest offers instead.`
+      }
     }
   } catch {
     // DB may be unavailable in local demo mode; fallback below.
+    usedDb = false
   }
-  if (products.length === 0) {
-    products = await getUiProducts({ q: q.toLowerCase() })
+
+  if (!usedDb) {
+    products = await getUiProducts({ q: qLower })
   }
 
   const offers = buildOffersFromProducts({ products, postcode, membership })
@@ -66,9 +116,8 @@ export default async function ComparePage({ searchParams }: Props) {
     return o
   })
 
-
-  const sourceNote = products.some((p) => (p.source ?? '').startsWith('db:'))
-    ? 'Results are built from your uploaded offers (CSV/authorised feeds).'
+  const sourceNote = usedDb
+    ? `Results are built from your live offers database. ${note}`.trim()
     : 'Results are using the built-in sample list (upload offers for real comparisons).'
 
   const faq = [
@@ -120,7 +169,7 @@ export default async function ComparePage({ searchParams }: Props) {
 
       <p className="text-xs text-slate-500 dark:text-slate-400">{sourceNote}</p>
 
-      <CompareResultsTable offers={offers.slice(0, 200)} />
+      <CompareResultsTable offers={offersWithBadges.slice(0, 200)} />
 
       {/* SEO-safe structured FAQ (adds trust without spam) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />

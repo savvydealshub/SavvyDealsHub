@@ -231,18 +231,6 @@ async function uploadAction(formData: FormData) {
       return { ok: false, reason: `Missing required fields (sku, title, url)`, sku, title, url }
     }
 
-    // Hard stop: prevent template/sample placeholders ever reaching the DB.
-    const urlLower = url.toLowerCase()
-    if (urlLower.includes('example.com') || urlLower.includes('example.org')) {
-      return { ok: false, reason: `Sample URL detected (example.*)`, sku, title, url }
-    }
-    if (url.includes('[ADD_AFFILIATE_URL]') || urlLower.includes('add_affiliate_url')) {
-      return { ok: false, reason: `Placeholder affiliate URL detected`, sku, title, url }
-    }
-    if (title.toLowerCase().startsWith('example ')) {
-      return { ok: false, reason: `Sample row detected (Example …)`, sku, title, url }
-    }
-
     // URL allow-list (UK focused). Reject only if rules explicitly say to drop.
     const allowed = urlLooksAllowedForRules(url, rules)
     if ((rules.dropIfUrlNotUkLike ?? false) && !allowed) {

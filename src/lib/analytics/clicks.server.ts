@@ -114,3 +114,19 @@ export async function getRetailerPerformance(opts: { days?: number } = {}) {
     }
   })
 }
+
+export async function getTopClickedOfferIds(args: { days?: number; limit?: number } = {}) {
+  const days = typeof args.days === 'number' && args.days > 0 ? args.days : 7
+  const limit = typeof args.limit === 'number' && args.limit > 0 ? args.limit : 25
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+  const rows = await db.clickEvent.groupBy({
+    by: ['offerId'],
+    where: { createdAt: { gte: since } },
+    _count: { id: true },
+    orderBy: { _count: { id: 'desc' } },
+    take: limit,
+  })
+
+  return rows.map((r) => ({ offerId: r.offerId, clicks: r._count.id }))
+}

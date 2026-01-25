@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#22c55e" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#0ea5e9" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect x="70" y="70" width="1060" height="660" rx="56" fill="white" opacity="0.85"/>
+  <rect x="70" y="70" width="1060" height="660" rx="56" fill="url(#accent)"/>
+
+  <g transform="translate(0,10)" fill="#0f172a" opacity="0.35">
+    <path d="M600 240 440 370v190c0 22 18 40 40 40h240c22 0 40-18 40-40V370L600 240zm-60 330V460h120v110H540z"/>
+    <path d="M420 370l180-150 180 150v-34L600 196 420 336v34z" opacity="0.85"/>
+  </g>
+
+  <text x="600" y="540" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="40" fill="#0f172a" opacity="0.72">SavvyDealsHub</text>
+  <text x="600" y="585" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="22" fill="#334155" opacity="0.72">Home &amp; Living</text>
+</svg>

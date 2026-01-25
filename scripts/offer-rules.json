@@ -1,0 +1,89 @@
+﻿{
+  "maxPrice": 100,
+  "requiredColumns": [
+    "sku",
+    "title",
+    "description",
+    "category",
+    "retailer",
+    "url",
+    "imageUrl",
+    "price",
+    "shippingPrice",
+    "shippingIncluded",
+    "condition",
+    "membershipRequired",
+    "membershipType",
+    "isSponsored",
+    "sponsorLabel"
+  ],
+  "defaults": {
+    "shippingIncluded": "No",
+    "membershipRequired": "No",
+    "isSponsored": "No",
+    "condition": "New",
+    "membershipTypeIfRequired": "Prime",
+    "sponsorLabelIfSponsored": "Sponsored"
+  },
+  "allowedEnums": {
+    "condition": [
+      "New",
+      "Used",
+      "Refurbished"
+    ]
+  },
+  "enforceConditionNewOnly": false,
+  "requireUkDelivery": true,
+  "ukRetailerPatterns": {
+    "Amazon": [
+      "amazon.co.uk",
+      ".co.uk"
+    ],
+    "eBay": [
+      "ebay.co.uk",
+      ".co.uk"
+    ],
+    "Tesco": [
+      "tesco.com",
+      ".co.uk"
+    ],
+    "Argos": [
+      "argos.co.uk",
+      ".co.uk"
+    ],
+    "Currys": [
+      "currys.co.uk",
+      ".co.uk"
+    ],
+    "AO": [
+      "ao.com",
+      ".co.uk"
+    ],
+    "John Lewis": [
+      "johnlewis.com",
+      ".co.uk"
+    ],
+    "Very": [
+      "very.co.uk",
+      ".co.uk"
+    ]
+  },
+  "ukFallbackPatterns": [
+    ".co.uk",
+    "amazon.co.uk",
+    "ebay.co.uk",
+    "argos.co.uk",
+    "currys.co.uk",
+    "ao.com",
+    "johnlewis.com",
+    "tesco.com",
+    "very.co.uk"
+  ],
+  "allowPlaceholderUrls": true,
+  "placeholderPatterns": [
+    "example.com",
+    "localhost",
+    "127.0.0.1"
+  ]
+}
+

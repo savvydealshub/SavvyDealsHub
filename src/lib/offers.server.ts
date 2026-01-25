@@ -24,7 +24,14 @@ export async function getUiOffersFromDb(args: GetOffersArgs = {}): Promise<UiPro
   const category = args.categorySlug ? normalize(args.categorySlug) : ''
   const limit = args.limit && args.limit > 0 ? args.limit : 500
 
-  const where: any = {}
+  const where: any = {
+    AND: [
+      { NOT: { url: { contains: 'example.com', mode: 'insensitive' } } },
+      { NOT: { title: { startsWith: 'Example', mode: 'insensitive' } } },
+      { NOT: { url: { contains: 'ADD_AFFILIATE_URL', mode: 'insensitive' } } },
+      { NOT: { url: { contains: '[ADD_AFFILIATE_URL]', mode: 'insensitive' } } },
+    ],
+  }
   if (category) where.category = { equals: category, mode: 'insensitive' }
   if (q) {
     where.OR = [
@@ -64,4 +71,42 @@ export async function getUiOffersFromDb(args: GetOffersArgs = {}): Promise<UiPro
 
 export async function getOfferCount(): Promise<number> {
   return db.offer.count()
+}
+
+/**
+ * Fetch specific offers by DB id, preserving the requested ordering.
+ * Useful for "Trending" shelves (click-based) and other ranking surfaces.
+ */
+export async function getUiOffersByIds(offerIds: number[]): Promise<UiProduct[]> {
+  if (!offerIds || offerIds.length === 0) return []
+
+  const rows = await db.offer.findMany({
+    where: { id: { in: offerIds } },
+    take: offerIds.length,
+  })
+
+  const mapped = new Map<number, UiProduct>()
+  for (const o of rows) {
+    mapped.set(o.id, {
+      offerId: o.id,
+      sku: o.sku,
+      title: o.title,
+      description: o.description ?? undefined,
+      price: typeof o.price === 'number' ? o.price : undefined,
+      imageUrl: o.imageUrl ?? undefined,
+      url: o.url,
+      category: o.category,
+      shippingPrice: typeof o.shippingPrice === 'number' ? o.shippingPrice : undefined,
+      shippingIncluded: Boolean(o.shippingIncluded),
+      membershipRequired: Boolean(o.membershipRequired),
+      membershipType: (o.membershipType as any) ?? undefined,
+      condition: (o.condition as any) ?? undefined,
+      isSponsored: Boolean(o.isSponsored),
+      sponsorLabel: o.sponsorLabel ?? undefined,
+      source: `db:${o.retailer}`,
+      updatedAt: o.updatedAt.toISOString(),
+    })
+  }
+
+  return offerIds.map((id) => mapped.get(id)).filter(Boolean) as UiProduct[]
 }

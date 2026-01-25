@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="a" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#0f172a" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#0f172a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <rect x="80" y="80" width="1040" height="640" rx="48" fill="#ffffff"/>
+  <rect x="80" y="80" width="1040" height="640" rx="48" fill="url(#a)"/>
+
+  <!-- Icon bubble -->
+  <rect x="140" y="140" width="120" height="120" rx="28" fill="#0f172a" fill-opacity="0.08"/>
+  <path d="M200 166c30 0 54 24 54 54s-24 54-54 54-54-24-54-54 24-54 54-54zm0 22a32 32 0 100 64 32 32 0 000-64z" fill="#0f172a" fill-opacity="0.25"/>
+
+  <!-- Brand -->
+  <text x="290" y="208" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="34" font-weight="700" fill="#0f172a" fill-opacity="0.78">SavvyDealsHub</text>
+  <text x="290" y="248" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="18" font-weight="600" fill="#0f172a" fill-opacity="0.45">Product image unavailable</text>
+
+  <!-- Label -->
+  <text x="140" y="350" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="56" font-weight="800" fill="#0f172a" fill-opacity="0.82">Amazon</text>
+  <text x="140" y="410" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="22" font-weight="600" fill="#0f172a" fill-opacity="0.45">Tap “View Deal” to see live price & delivery</text>
+
+  <!-- Footer bar -->
+  <rect x="140" y="600" width="920" height="10" rx="5" fill="#0f172a" fill-opacity="0.10"/>
+  <rect x="140" y="630" width="620" height="10" rx="5" fill="#0f172a" fill-opacity="0.08"/>
+</svg>

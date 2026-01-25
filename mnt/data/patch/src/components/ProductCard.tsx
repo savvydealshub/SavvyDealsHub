@@ -2,16 +2,24 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { affiliateUrl } from '../lib/affiliate'
 import { computeShippingSanity } from '../lib/deals/shippingSanity'
-import { offerImageUrl } from '../lib/images'
 
 type ProductCardProps = {
   p?: any
   product?: any
 }
 
-// Always return a usable image URL (either the real image or a branded fallback).
-function getImageSrc(p: any): string {
-  return offerImageUrl({ imageUrl: p?.imageUrl ?? null, retailer: p?.retailer ?? null, category: p?.category ?? null })
+function safeImageSrc(input: any): string {
+  if (!input || typeof input !== 'string') return ''
+  const s = input.trim()
+  if (!s) return ''
+  // Common placeholder tokens from templates / seed data
+  if (s.startsWith('[')) return ''
+  if (s.toUpperCase().includes('ADD_IMAGE_URL')) return ''
+
+  if (s.startsWith('/')) return s
+  if (s.startsWith('http://') || s.startsWith('https://')) return s
+
+  return ''
 }
 
 export default function ProductCard(props: ProductCardProps) {
@@ -30,12 +38,18 @@ export default function ProductCard(props: ProductCardProps) {
   const showItemPrice = sanity.itemPrice != null
   const showTotal = sanity.totalPrice != null
 
-  const imgSrc = getImageSrc(p)
+  const imgSrc = safeImageSrc(p.imageUrl)
 
   return (
     <div className="card">
       <div className="relative w-full h-40 mb-2 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
-        <Image src={imgSrc} alt={p.title} fill className="object-cover" />
+        {imgSrc ? (
+          <Image src={imgSrc} alt={p.title} fill className="object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+            No image
+          </div>
+        )}
       </div>
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold line-clamp-2 flex-1">{p.title}</h3>

@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import { offerImageUrl } from '../lib/images'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { CompareOffer } from '../lib/compare.server'
@@ -25,8 +24,15 @@ function retailerTrustBadge(retailer: string): string | null {
   return null
 }
 
-function getImageSrc(o: any): string {
-  return offerImageUrl({ imageUrl: o?.imageUrl ?? null, retailer: o?.retailer ?? null, category: o?.category ?? null })
+function safeImageSrc(input: any): string {
+  if (!input || typeof input !== "string") return ""
+  const s = input.trim()
+  if (!s) return ""
+  if (s.startsWith("[")) return ""
+  if (s.toUpperCase().includes("ADD_IMAGE_URL")) return ""
+  if (s.startsWith("/")) return s
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  return ""
 }
 
 export default function CompareResultsTable({ offers, currency = '£' }: Props) {
@@ -308,7 +314,13 @@ export default function CompareResultsTable({ offers, currency = '£' }: Props) 
               >
                 <td className="p-3">
                   <div className="relative h-14 w-14 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
-                    <Image src={getImageSrc(o)} alt={o.title} fill sizes="56px" className="object-cover" />
+                    {(() => {
+                      const imgSrc = safeImageSrc(o.imageUrl)
+                      return imgSrc ? (
+                        <Image src={imgSrc} alt={o.title} fill sizes="56px" className="object-cover" />
+                      ) : null
+                    })()}
+
                   </div>
                 </td>
                 <td className="p-3">
