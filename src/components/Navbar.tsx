@@ -88,6 +88,14 @@ export default function Navbar() {
                   Categories
                 </Link>
                 <Link
+                  href="/retailers"
+                  onClick={closeMenu}
+                  className="block px-4 py-2 text-sm hover:bg-sdh-bg dark:hover:bg-sdh-bg-dark/70"
+                  role="menuitem"
+                >
+                  Retailers
+                </Link>
+                <Link
                   href="/compare"
                   onClick={closeMenu}
                   className="block px-4 py-2 text-sm hover:bg-sdh-bg dark:hover:bg-sdh-bg-dark/70"

@@ -24,7 +24,20 @@ export const env = {
     tag: process.env.AMAZON_ASSOC_TAG || '',
     accessKey: process.env.AMAZON_ACCESS_KEY || '',
     secretKey: process.env.AMAZON_SECRET_KEY || '',
-    apiBase: process.env.AMAZON_PARTNER_API_BASE || ''
+    apiBase: process.env.AMAZON_PARTNER_API_BASE || '',
+    host: process.env.AMAZON_PARTNER_API_HOST || 'webservices.amazon.co.uk',
+    region: process.env.AMAZON_PARTNER_API_REGION || 'eu-west-1',
+    marketplace: process.env.AMAZON_MARKETPLACE || 'www.amazon.co.uk',
+  },
+
+  // eBay Buy APIs (optional — requires eBay developer keys)
+  ebay: {
+    clientId: process.env.EBAY_CLIENT_ID || '',
+    clientSecret: process.env.EBAY_CLIENT_SECRET || '',
+    apiBase: process.env.EBAY_API_BASE || 'https://api.ebay.com',
+    oauthBase: process.env.EBAY_OAUTH_BASE || 'https://api.ebay.com',
+    marketplaceId: process.env.EBAY_MARKETPLACE_ID || 'EBAY_GB',
+    scope: process.env.EBAY_OAUTH_SCOPE || 'https://api.ebay.com/oauth/api_scope',
   },
   /**
    * Optional: Wrap outbound product URLs with an affiliate/tracking template.

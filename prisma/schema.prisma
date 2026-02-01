@@ -58,6 +58,14 @@ enum RetailerMembership {
   CLUBCARD
 }
 
+
+enum AffiliateNetwork {
+  amazon
+  skimlinks
+  ebay_partner
+  direct
+}
+
 model Offer {
   id                 Int               @id @default(autoincrement())
 
@@ -70,6 +78,9 @@ model Offer {
   // Retailer listing data
   retailer           String
   url                String
+  deepLink           String?
+  country            String            @default("UK")
+  affiliateNetwork   AffiliateNetwork  @default(direct)
   imageUrl           String?
 
   // Prices
@@ -128,6 +139,9 @@ model ClickEvent {
   category  String
   source    String?
   cta       String?
+
+  country          String?
+  affiliateNetwork AffiliateNetwork?
 
   createdAt DateTime @default(now())
 

@@ -12,7 +12,7 @@ export default function Footer() {
     <footer className="border-t mt-10">
       <div className="container py-8 text-xs sm:text-sm text-gray-600 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
         <div>
-          © {year} SavvyDealsHub — Affiliate links may earn us a commission.{' '}
+          © {year} SavvyDealsHub — Affiliate links may earn us a commission (including via Amazon and eBay).{' '}
           <span className="whitespace-nowrap">As an Amazon Associate I earn from qualifying purchases.</span>
         </div>
         <div className="flex flex-wrap gap-3 items-center">
@@ -46,6 +46,9 @@ export default function Footer() {
             className="underline underline-offset-2 hover:text-gray-900"
           >
             Affiliate disclosure
+          </a>
+          <a href="/about" className="underline underline-offset-2 hover:text-gray-900">
+            About
           </a>
           <a href="/contact" className="underline underline-offset-2 hover:text-gray-900">
             Contact

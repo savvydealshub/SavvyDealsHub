@@ -98,6 +98,7 @@ export default function ConsentScriptLoader() {
 
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+  const skimlinksScriptUrl = process.env.NEXT_PUBLIC_SKIMLINKS_SCRIPT_URL
 
   return (
     <>
@@ -129,6 +130,16 @@ export default function ConsentScriptLoader() {
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
           crossOrigin="anonymous"
+        />
+      )}
+
+      {/* Skimlinks (optional, marketing cookies) */}
+      {skimlinksScriptUrl && consent.marketing && (
+        <Script
+          id="sdh-skimlinks"
+          strategy="afterInteractive"
+          async
+          src={skimlinksScriptUrl}
         />
       )}
     </>

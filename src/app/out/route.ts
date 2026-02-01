@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     try {
       const offer = await db.offer.findUnique({
         where: { id: offerId },
-        select: { id: true, url: true, retailer: true, category: true },
+        select: { id: true, url: true, deepLink: true, retailer: true, category: true, country: true, affiliateNetwork: true },
       })
 
       if (offer?.url) {
@@ -53,13 +53,15 @@ export async function GET(req: Request) {
               category: offer.category,
               source: src,
               cta,
+              country: offer.country || undefined,
+              affiliateNetwork: offer.affiliateNetwork || undefined,
             },
           })
         } catch {
           // ignore
         }
 
-        const dest = safeHttpUrl(offer.url) || u
+        const dest = safeHttpUrl(offer.url) || safeHttpUrl(offer.deepLink) || u
         if (dest) return NextResponse.redirect(dest, { status: 302 })
       }
     } catch {

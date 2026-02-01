@@ -18,7 +18,10 @@ export default function ProductCard(props: ProductCardProps) {
   const p = props.product ?? props.p
   if (!p) return null
 
-  const href = affiliateUrl(p.url)
+  const offerId = p?.offerId != null ? Number(p.offerId) : NaN
+  const href = Number.isFinite(offerId) && offerId > 0
+    ? `/out?offerId=${encodeURIComponent(String(offerId))}&src=card&cta=view-deal&u=${encodeURIComponent(String(p.url || ''))}`
+    : affiliateUrl(p.url)
 
   const sanity = computeShippingSanity({
     price: p.price ?? null,
@@ -107,7 +110,7 @@ export default function ProductCard(props: ProductCardProps) {
         href={href}
         className="btn mt-3 inline-block text-center bg-black text-white"
         target="_blank"
-        rel="noopener noreferrer sponsored"
+        rel="nofollow sponsored noopener noreferrer"
       >
         View Deal
       </Link>
