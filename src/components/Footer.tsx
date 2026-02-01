@@ -12,8 +12,8 @@ export default function Footer() {
     <footer className="border-t mt-10">
       <div className="container py-8 text-xs sm:text-sm text-gray-600 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
         <div>
-          © {year} SavvyDealsHub — Affiliate links may earn us a commission (including via Amazon and eBay).{' '}
-          <span className="whitespace-nowrap">As an Amazon Associate I earn from qualifying purchases.</span>
+          © {year} SavvyDealsHub — SavvyDealsHub participates in affiliate programmes, including the Amazon Services LLC Associates Program and the eBay Partner Network. Affiliate links may earn us a commission at no extra cost to you.{' '}
+          <span className="whitespace-nowrap">As an Amazon Associate we earn from qualifying purchases.</span>
         </div>
         <div className="flex flex-wrap gap-3 items-center">
           <button

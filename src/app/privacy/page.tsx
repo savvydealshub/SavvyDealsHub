@@ -103,13 +103,19 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-lg font-semibold">5) Amazon Associates &amp; affiliate links</h2>
+        <h2 className="text-lg font-semibold">5) Amazon Associates &amp; affiliate links</h2>
         <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800">
-          <span className="font-medium">Amazon disclosure:</span> As an Amazon Associate I earn from qualifying purchases.
+          <span className="font-medium">Amazon disclosure:</span> As an Amazon Associate we earn from qualifying purchases.
         </div>
         <p>
-          When you click an affiliate link and buy something, we may earn a commission at no extra cost to you. Affiliate
-          partners (including Amazon, the eBay Partner Network, and other retailers/networks we work with) may use
-          cookies or similar technologies on their sites to track referrals and attribute qualifying purchases.
+          SavvyDealsHub participates in affiliate programmes, including the Amazon Services LLC Associates Program, which
+          allows sites to earn advertising fees by advertising and linking to Amazon.co.uk and related sites.
+        </p>
+        <p>
+          When you click an affiliate link and make a purchase, we may earn a commission at no extra cost to you. Amazon,
+          the eBay Partner Network, and other affiliate partners may use cookies or similar technologies on their own
+          sites to track referrals and attribute qualifying purchases in accordance with their own privacy policies. We
+          encourage you to review those policies when you leave our site.
         </p>
 
         <h2 className="text-lg font-semibold">6) Lawful bases (UK/EU)</h2>

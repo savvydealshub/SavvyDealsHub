@@ -25,17 +25,22 @@ export default function AffiliateDisclosurePage() {
         <div className="rounded-2xl border border-slate-200 p-4 bg-white">
           <h2 className="font-semibold mb-2">Affiliate programs we may use</h2>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Amazon Associates</li>
+            <li>Amazon Services LLC Associates Program (Amazon Associates)</li>
             <li>eBay Partner Network (EPN)</li>
             <li>Other affiliate networks and merchant partner programs (where available and permitted)</li>
           </ul>
         </div>
 
         <p className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800">
-          <span className="font-medium">Amazon disclosure:</span> As an Amazon Associate I earn from qualifying purchases.
+          <span className="font-medium">Amazon disclosure:</span> As an Amazon Associate we earn from qualifying purchases.
         </p>
 
         <p>Affiliate revenue helps cover hosting and development costs and keeps the site running.</p>
+
+        <p>
+          Affiliate partners may use cookies or similar technologies to record referrals and attribute qualifying purchases. Any
+          purchase you make is between you and the merchant, and those third parties process data under their own privacy policies.
+        </p>
 
         <p>
           Wherever practical, outbound product links are marked as <span className="font-medium">sponsored</span> and
